@@ -13,7 +13,7 @@ router.post('/register',
 	adminAuthCtrl.checkUniqueEmail, 
 	adminAuthCtrl.hash, 
 	adminAuthCtrl.registerAdmin,
-    adminAuthCtrl.sendVerificationEmail,
+    // adminAuthCtrl.sendVerificationEmail,
 	(req, res) => {
 	res.status(201);
     res.send({

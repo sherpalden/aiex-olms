@@ -13,7 +13,7 @@ router.post('/register',
 	userAuthCtrl.checkUniqueEmail, 
 	userAuthCtrl.hash, 
 	userAuthCtrl.registerUser,
-    userAuthCtrl.sendVerificationEmail,
+    // userAuthCtrl.sendVerificationEmail,
 	(req, res) => {
 	res.status(201);
     res.send({
