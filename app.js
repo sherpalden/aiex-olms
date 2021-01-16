@@ -41,6 +41,8 @@ app.use('/api/admin/news', adminNewsRoutes);
 const swaggerRoutes = require('./routes/swaggerRoutes.js');
 app.use('/api/swagger', swaggerRoutes);
 
+app.get('/', (req, res) => {res.send("aiex-olms running...")});
+
 // error handler
 const { UserFacingError } = require('./error/errorHandler.js');
 app.use( (err, req, res, next) => {
