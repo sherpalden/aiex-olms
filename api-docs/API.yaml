@@ -9,6 +9,8 @@ info:
 servers: 
   - url: http://localhost:5000
     description: Local Server
+  - url: http://localhost:5000
+    description: Heroku Server
 
 paths:
   /api/admin/register:
