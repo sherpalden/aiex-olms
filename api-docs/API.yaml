@@ -1,0 +1,389 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: 'Online-LMS APIs'
+  description: 'List of REST APIs Documentation for Online Learning Management System'
+  contact:
+    name: Palden Sherpa
+    email: sherpalden369@gmail.com
+servers: 
+  - url: http://localhost:5000
+    description: Local Server
+
+paths:
+  /api/admin/register:
+    post:
+      tags:
+        - Admin Authentication
+      description: Register new admin.
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: Palden
+                lastName:
+                  type: string
+                  example: Sherpa
+                email:
+                  type: string
+                  example: sherpalden369@gmail
+                role:
+                  type: string
+                  example: admin-1
+                password:
+                  type: string
+                  example: Password_123
+                  
+      responses:
+        201:
+          description: Registration Successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Registration Successful"
+
+  /api/admin/login:
+    post:
+      tags:
+        - Admin Authentication
+      description: Login admin.
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: sherpalden369@gmail.com
+                password:
+                  type: string
+                  example: Password_123
+      responses:
+        202:
+          description: Login Successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login Successful
+                  accessToken:
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiJpVFVrS0M4T0IiLCJlbWFpbCI6InNoZXJwYWxkZW4zNjlAZ21haWwuY29tIiwiaWF0IjoxNjAyNTc4MTI2LCJleHAiOjE2MDI2MzgxMjZ9.xI_Y5EGPZP8E0RgAwtdIIDdDvkXF2Zdoa1p0z9nKDbA
+
+  /api/admin/forgotPassword:
+    put:
+      tags:
+        - Admin Authentication
+      description: Process password reset request.
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: sherpalden369@gmail.com
+      responses:
+        200:
+          description: Password reset request processed and reset link has been sent to the email, sherpalden369@gmail.com
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password reset request successfully processed and reset link is sent to the email, sherpalden369@gmail.com
+
+  /api/admin/resetPassword:
+    put:
+      tags:
+        - Admin Authentication
+      description: Change old password and set new one.
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword:
+                  type: string
+                  example: sherpalden369@gmail.com
+                resetToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiJpVFVrS0M4T0IiLCJlbWFpbCI6InNoZXJwYWxkZW4zNjlAZ21haWwuY29tIiwiaWF0IjoxNjAyNTc4MTI2LCJleHAiOjE2MDI2MzgxMjZ9.xI_Y5EGPZP8E0RgAwtdIIDdDvkXF2Zdoa1p0z9nKDbA
+      responses:
+        200:
+          description: Old password removed and new password set.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password Reset Successful
+
+
+
+
+#******
+#******
+#******
+#******
+#******
+#******
+  
+  api/admin/news/post-news:
+    post:
+      tags:
+        - News APIs - Admin
+      description: Create a news post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                title:
+                  type: string
+                  example: Nepal is a agricultural country but we import agro products from India.
+                categoryID:
+                  type: string
+                  example: 345dght56757ghjg678
+                description:
+                  type: string
+                  example: News description here
+                metaTags:
+                  type: array
+                  example: ['tag-1', 'tag-2', 'tag-3']
+                youtubeLink:
+                  type: string
+                  example: https://youtu.be/QNInfBuBcOA
+      responses:
+        200:
+          description: Response on successful creation of news post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News Post Creation Successful
+
+
+  api/admin/news/update-news/{newsID}:
+    put:
+      tags:
+        - News APIs - Admin
+      description: Update a news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: newsID
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                title:
+                  type: string
+                  example: Nepal is a agricultural country but we import agro products from India.
+                categoryID:
+                  type: string
+                  example: 345dght56757ghjg678
+                description:
+                  type: string
+                  example: News description here
+                metaTags:
+                  type: array
+                  example: ['tag-1', 'tag-2', 'tag-3']
+                youtubeLink:
+                  type: string
+                  example: https://youtu.be/QNInfBuBcOA
+                imagesToBeDeleted:
+                  type: array
+                  example: ['img-1.jpg', 'img-2.jpg']
+      responses:
+        200:
+          description: Response on successful udpate of news post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News Update Successful
+
+
+  api/admin/news/set-thumbnail/{newsID}:
+    put:
+      tags:
+        - News APIs - Admin
+      description: Set a thumbnail image for a news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: newsID
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                thumbnailImage:
+                  type: string
+                  example: img-1.jpg
+      responses:
+        200:
+          description: Response on successful set of thumbnail image for news post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News thumbnail image set Successful
+
+
+  api/admin/news/details/{newsID}:
+    get:
+      tags:
+        - News APIs - Admin
+      description: Get the details data of the particular news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: newsID
+      responses:
+        200:
+          description: Response on successful retrieval of detail data of the particular news post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News post details retrieval successful
+
+
+  api/admin/news/all-news/{categoryID}:
+    get:
+      tags:
+        - News APIs - Admin
+      description: Get all the news of the particular categoryID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+      responses:
+        200:
+          description: Response on successful retrieval of news of particular categoryID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News posts of particular categoryID retrieval successful
+
+#******
+#******
+#******
+#******
+#******
+#******
+
+  api/user/news/details/{newsID}:
+    get:
+      tags:
+        - News APIs - User
+      description: Get the details data of the particular news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: newsID
+      responses:
+        200:
+          description: Response on successful retrieval of detail data of the particular news post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News post details retrieval successful
+
+
+  api/user/news/all-news/{categoryID}:
+    get:
+      tags:
+        - News APIs - User
+      description: Get all the news of the particular categoryID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+      responses:
+        200:
+          description: Response on successful retrieval of news of particular categoryID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News posts of particular categoryID retrieval successful
+
+
+components:
+  securitySchemes:
+    bearerAuth:           
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  
