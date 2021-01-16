@@ -9,7 +9,7 @@ info:
 servers: 
   - url: http://localhost:5000
     description: Local Server
-  - url: http://localhost:5000
+  - url: https://aiex-olms.herokuapp.com
     description: Heroku Server
 
 paths:
