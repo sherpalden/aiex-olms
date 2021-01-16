@@ -8,7 +8,7 @@ cd ap-backend-master
 npm install
 
 ## Run the server
-npm run server or npm start
+npm run dev or npm start
 
 ## Server runs on http://localhost:5000
 
