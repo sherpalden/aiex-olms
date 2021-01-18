@@ -144,6 +144,173 @@ paths:
                     example: Password Reset Successful
 
 
+#******
+#******
+#******
+#******
+#******
+#******
+
+  /api/admin/news/add-main-category:
+    post:
+      tags:
+        - News Category APIs - Admin
+      description: Add main news category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: Science and myths
+                  
+      responses:
+        201:
+          description: Response on successful addition of main news category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "News main category addition successful"
+
+
+  /api/admin/news/add-sub-category:
+    post:
+      tags:
+        - News Category APIs - Admin
+      description: Add sub category for news
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: Animal
+                parentID:
+                  type: string
+                  example: adfadf7987sdfs98798sdf
+                  
+      responses:
+        201:
+          description: Response on successful addition of sub category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "News sub category addition successful"
+
+
+  /api/admin/news/rename-category:
+    put:
+      tags:
+        - News Category APIs - Admin
+      description: Rename a category for news
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                newName:
+                  type: string
+                  example: Animal
+                categoryID:
+                  type: string
+                  example: adfadf7987sdfs98798sdf
+                  
+      responses:
+        201:
+          description: Response on successful rename of a category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category rename successful"
+
+
+  /api/admin/news/delete-category/{categoryID}:
+    delete:
+      tags:
+        - News Category APIs - Admin
+      description: Deletes all the sub categories and news associated with them including the category itself.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+      responses:
+        201:
+          description: Response on successful deletion of a category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category delete successful"
+
+
+  /api/admin/news/all-categories:
+    get:
+      tags:
+        - News Category APIs - Admin
+      description: Get all category list
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Response on successful retrieval of all category list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All category list retrieval successful"
+
+
+  /api/admin/news/all-category-tree:
+    get:
+      tags:
+        - News Category APIs - Admin
+      description: Get all category list in tree view
+      security:
+        - bearerAuth: []
+      responses:
+        201:
+          description: Response on successful retrieval of all category list in tree view
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All category list retrieval in tree view successful"
 
 
 #******
@@ -153,7 +320,7 @@ paths:
 #******
 #******
   
-  api/admin/news/post-news:
+  /api/admin/news:
     post:
       tags:
         - News APIs - Admin
@@ -183,7 +350,7 @@ paths:
                   example: News description here
                 metaTags:
                   type: array
-                  example: ['tag-1', 'tag-2', 'tag-3']
+                  example: ["tag-1", "tag-2", "tag-3"]
                 youtubeLink:
                   type: string
                   example: https://youtu.be/QNInfBuBcOA
@@ -200,7 +367,28 @@ paths:
                     example: News Post Creation Successful
 
 
-  api/admin/news/update-news/{newsID}:
+  /api/admin/news/{newsID}:
+    get:
+      tags:
+        - News APIs - Admin
+      description: Get the details data of the particular news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: newsID
+      responses:
+        200:
+          description: Response on successful retrieval of detail data of the particular news post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News post details retrieval successful
+
     put:
       tags:
         - News APIs - Admin
@@ -233,13 +421,13 @@ paths:
                   example: News description here
                 metaTags:
                   type: array
-                  example: ['tag-1', 'tag-2', 'tag-3']
+                  example: ["tag-1", "tag-2", "tag-3"]
                 youtubeLink:
                   type: string
                   example: https://youtu.be/QNInfBuBcOA
                 imagesToBeDeleted:
                   type: array
-                  example: ['img-1.jpg', 'img-2.jpg']
+                  example: ["img-1.jpg", "img-2.jpg"]
       responses:
         200:
           description: Response on successful udpate of news post.
@@ -252,8 +440,73 @@ paths:
                     type: string
                     example: News Update Successful
 
+    delete:
+      tags:
+        - News APIs - Admin
+      description: Delete a news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: newsID
+      responses:
+        200:
+          description: Response on successful deletion of news post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News delete Successful
 
-  api/admin/news/set-thumbnail/{newsID}:
+
+  /api/admin/news/all-news/{categoryID}:
+    get:
+      tags:
+        - News APIs - Admin
+      description: Get all the news of the particular categoryID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+      responses:
+        200:
+          description: Response on successful retrieval of news of particular categoryID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News posts of particular categoryID retrieval successful
+
+    delete:
+      tags:
+        - News APIs - Admin
+      description: Delete all news of particular categroyID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+      responses:
+        200:
+          description: Response on successful deletion of news of particular categoryID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News of particular category delete Successful
+
+
+  /api/admin/news/set-thumbnail/{newsID}:
     put:
       tags:
         - News APIs - Admin
@@ -286,51 +539,6 @@ paths:
                     example: News thumbnail image set Successful
 
 
-  api/admin/news/details/{newsID}:
-    get:
-      tags:
-        - News APIs - Admin
-      description: Get the details data of the particular news post
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: newsID
-      responses:
-        200:
-          description: Response on successful retrieval of detail data of the particular news post
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: News post details retrieval successful
-
-
-  api/admin/news/all-news/{categoryID}:
-    get:
-      tags:
-        - News APIs - Admin
-      description: Get all the news of the particular categoryID
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: categoryID
-      responses:
-        200:
-          description: Response on successful retrieval of news of particular categoryID
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: News posts of particular categoryID retrieval successful
-
 #******
 #******
 #******
@@ -338,7 +546,7 @@ paths:
 #******
 #******
 
-  api/user/news/details/{newsID}:
+  /api/user/news/{newsID}:
     get:
       tags:
         - News APIs - User
@@ -361,7 +569,7 @@ paths:
                     example: News post details retrieval successful
 
 
-  api/user/news/all-news/{categoryID}:
+  /api/user/news/{categoryID}:
     get:
       tags:
         - News APIs - User

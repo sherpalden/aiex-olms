@@ -17,15 +17,14 @@ router.post('/register',
 	(req, res) => {
 	res.status(201);
     res.send({
-        "message": "Partial registration is successful. Please verify your email for the complete registration.\
-        Verification email has been sent to "+req.body.email.trim(),
+        "message": "Admin registration is successful"
     })
 });
 
 // @route    PUT api/admin/verify-email
 // @desc     Verify admin email
 // @access   Public
-router.put('/verify-email', 
+router.get('/verify-email/:token', 
     adminAuthCtrl.verifyAdminEmail, 
     (req, res) => {
     res.status(200);

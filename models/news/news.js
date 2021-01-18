@@ -30,7 +30,8 @@ const NewsSchema = new mongoose.Schema({
     type: String
   },
   createdBy: {
-    type: mongoose.Types.ObjectId
+    type: mongoose.Types.ObjectId,
+    required: true
   },
   createdAt: {
     type: Date,

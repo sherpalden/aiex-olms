@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const is = require('type-is');
 const util = require('util');
+var appendField = require('append-field');
 
 //require database models
 const Users = require('../../models/users/users.js');
@@ -91,10 +92,56 @@ const renameCategory = async (req, res, next) => {
 
 const deleteCategory = async (req, res, next) => {
 	try{
-		if(!req.body.categoryID || (validationRule.notEmptyValidation(req.body.categoryID) === false)){
-			return next(new errObj.BadRequestError("categoryID field is required and cannot be empty."));
+		if(!req.params.categoryID) return next(new errObj.BadRequestError("categoryID is required as url parameter!"));
+		if(req.params.categoryID.split('').length != 24) return next(new errObj.BadRequestError('Invalid categoryID'));
+		const categoryID = mongoose.Types.ObjectId(req.params.categoryID);
+		const categories = await NewsCategories.find({});
+		let data = categories.map(el => {
+			let parentID;
+			if(el.parentID != null) {parentID = el.parentID.toString();}
+			else parentID = null;
+			return {
+				_id: el._id.toString(),
+				name: el.name,
+				parentID: parentID
+			}
+		})
+		//An Easy Way to Build a Tree in JavaScript Using Object References//
+		const idMapping = data.reduce((acc, el, i) => {
+			acc[el._id] = i;
+			return acc;
+		}, {});
+
+		let root;
+		data.forEach(el => {
+			// Handle the root element
+			if (el.parentID === null) {
+				root = el;
+				return;
+			}
+			// Use our mapping to locate the parent element in our data array
+			const parentEl = data[idMapping[el.parentID]];
+			// Add our current el to its parent's `children` array
+			parentEl.children = [...(parentEl.children || []), el];
+		});
+
+		function findSubTree(nodeID, root) {
+			if(root.children){
+				for(category of root.children){
+					if(category._id === nodeID) {
+						return category;
+					}
+					console.log(category.name)
+					findSubTree(nodeID, category);
+				}
+				// for(category of root.children){
+				// }
+			}
 		}
-		if(req.body.categoryID.split('').length != 24) return next(new errObj.BadRequestError("Invalid categoryID"));
+
+		let nodeID = categoryID.toString();
+		let subTree = findSubTree(nodeID, root);
+		req.subTree = subTree;
 		next();
 	}
 	catch(err){
@@ -154,7 +201,18 @@ const getAllCategoryTree = async (req, res, next) => {
 	}
 }
 
-/*Category management ends here*/
+/*Category management ends here
+**
+*
+*
+*
+*
+*
+*
+*
+*
+*
+*/
 
 /*News functionality begins here*/
 const uploadNewsFiles = async (req, res, next) => {
@@ -163,21 +221,24 @@ const uploadNewsFiles = async (req, res, next) => {
 	try {
 		if(!is(req, ['multipart'])) return next(new errObj.BadRequestError("The content type must be multipart/form-data"));
         const busboy = new Busboy({headers: req.headers, highWaterMark: 2 * 1024 * 1024});
-        busboy.on('field', (fieldname, val) => {
-            req.body[fieldname] = val;
+        busboy.on('field', (fieldname, value) => {
+            appendField(req.body, fieldname, value)
         });
         busboy.on('file', (key, file, name, encoding, mimetype) => {
-            const fileExt = path.extname(name);
-            const fileNameSplitted = name.split('.');
-            const filename = fileNameSplitted[fileNameSplitted.length - 2] + '-' + Date.now() + fileExt;
-            if(fileExt === '.jpeg' || fileExt === '.jpg' ||  fileExt === '.png' || fileExt === '.gif'){
-                images.push(filename);
-                filesUploaded.push(`./public/uploads/temp/${filename}`);
-            	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
-            }
-            else {
-                return next(new errObj.BadRequestError("Invalid file type!!!"));
-            }
+        	try{
+	            const fileExt = path.extname(name);
+	            const fileNameSplitted = name.split('.');
+	            const filename = fileNameSplitted[fileNameSplitted.length - 2] + '-' + Date.now() + fileExt;
+	            if(fileExt === '.jpeg' || fileExt === '.jpg' ||  fileExt === '.png' || fileExt === '.gif'){
+	                images.push(filename);
+	                filesUploaded.push(`./public/uploads/temp/${filename}`);
+	            	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
+	            }
+	            else {
+	                return next(new errObj.BadRequestError("Invalid file type!!!"));
+	            }
+        	}
+        	catch(err){return next(err)}
         });
         busboy.on('finish', (err) => {
             if (err) return next(err)
@@ -201,16 +262,16 @@ const uploadNewsFiles = async (req, res, next) => {
 
 const newsValidation = async (req, res, next) => {
 	try {
-		const requiredFields = ['title', 'categoryID', 'description']
-		for(field in requiredFields){
+		const requiredFields = ['title', 'categoryID', 'description'];
+		for(field of requiredFields){
 			if(!req.body[field] || (validationRule.notEmptyValidation(req.body[field]) === false)){
-				throw new Error({statusCode: 400, message: `${field} field is required!`})
+				throw new errObj.BadRequestError(`${field} field is required and cannot be empty.`);
 			}
 		}
-		if(req.body.categoryID.split('').length != 24) throw new Error({statusCode: 400, message: 'Invalid categoryID'})
-		if(!req.body.metaTags) throw new Error({statusCode: 400, message: `metaTags field is required!`});
+		if(req.body.categoryID.split('').length != 24) throw new errObj.BadRequestError("Invalid categoryID")
+		if(!req.body.metaTags) throw new errObj.BadRequestError("metaTags field is required.");
 		const metaTags = JSON.parse(req.body.metaTags);
-		if(metaTags.length < 3) throw new Error({statusCode: 400, message: `At least 3 tags are required!!!`});
+		if(metaTags.length < 3) throw new errObj.BadRequestError("At least 3 meta tags are required")
 		debugger
 		next();
 	}
@@ -234,7 +295,7 @@ const postNews = async (req, res, next) => {
 			description: req.body.description,
 			thumbnail: req.images[0] || null,
 			images: req.images,
-			metaTags: req.body.metaTags,
+			metaTags: JSON.parse(req.body.metaTags),
 			youtubeLink: req.body.youtubeLink || null,
 			createdBy: adminID,
 		})
@@ -257,6 +318,47 @@ const postNews = async (req, res, next) => {
     }
 }
 
+const deleteNews = async (req, res, next) => {
+	try{
+		if(!req.params.newsID) return next(new errObj.BadRequestError("newsID is required as url parameter!"))
+		if(req.params.newsID.split('').length != 24) return next(new errObj.BadRequestError('Invalid newsID'))
+		const newsID = mongoose.Types.ObjectId(req.params.newsID);
+		const news = await News.findOne({_id: newsID});
+		if(!news) return next(new errObj.NotFoundError("News corresponding to the newsID not found"));
+		for(image of news.images){
+			await fileDeleter.deleteFile(`./public/uploads/news/${image}`);
+		}
+		await news.deleteOne({_id: newsID});
+		debugger
+		next();
+	}
+	catch(err){
+		next(err);
+	}
+}
+
+const deleteNewsByCategory = async (req, res, next) => {
+	try{
+		if(!req.params.categoryID) return next(new errObj.BadRequestError("categoryID is required as url parameter!"));
+		if(req.params.categoryID.split('').length != 24) return next(new errObj.BadRequestError('Invalid categoryID'));
+		const categoryID = mongoose.Types.ObjectId(req.params.categoryID);
+		console.log(categoryID)
+		const allNews = await News.find({categoryID: categoryID});
+		if(allNews.length < 1) return next(new errObj.NotFoundError("No news found to delete."));
+		for(news of allNews){
+			for(image of news.images){
+				await fileDeleter.deleteFile(`./public/uploads/news/${image}`);
+			}
+		}
+		await News.deleteMany({categoryID: categoryID});
+		debugger 
+		next();
+	}
+	catch(err){
+		next(err);
+	}
+}
+
 const setThumbnail = async (req, res, next) => {
 	try{
 		if(!req.params.newsID) return next(new errObj.BadRequestError("newsID is required as url parameter!"))
@@ -264,6 +366,7 @@ const setThumbnail = async (req, res, next) => {
 		const newsID = mongoose.Types.ObjectId(req.params.newsID);
 		if(!req.body.thumbnailImage) return next(new errObj.BadRequestError("thumbnailImage name is required"));
 		const news = await News.findOne({_id: newsID});
+		if(!news) return next(new errObj.NotFoundError("News corresponding to the newsID not found"));
 		if(!news.images.includes(req.body.thumbnailImage)){
 			return next(new errObj.NotFoundError("The thumbnail image name not found"));
 		}
@@ -358,15 +461,16 @@ const getNewsDetail = async (req, res, next) => {
 		let categoryHierarchy = [];
 		const categories = await NewsCategories.find({});
 
-		(function findTreeHierarchyLevel(categoryID){
+		function findTreeHierarchyLevel(categoryID){
 			for(category of categories){
-				if(category._id.equals(categoryID)){
+				if(category._id.equals(categoryID) || category._id == categoryID){
 					categoryHierarchy.push({_id: category._id, name: category.name});
 					if(category.parentID === null) return;
 					else findTreeHierarchyLevel(category.parentID)
 				}
 			}
-		})();
+		};
+		findTreeHierarchyLevel(categoryID);
 		newsData.categoryHierarchy = categoryHierarchy;
 		req.newsData = newsData;
 		debugger
@@ -436,6 +540,8 @@ module.exports = {
 	postNews,
 	setThumbnail,
 	updateNews,
+	deleteNews,
+	deleteNewsByCategory,
 
 	getNewsDetail,
 	getNewsByCategory,

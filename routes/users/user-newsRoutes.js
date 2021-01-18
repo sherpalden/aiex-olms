@@ -37,19 +37,29 @@ router.get('/all-category-tree',
 
 /*News APIs Begins*/
 
-// @route    GET api/user/news/getNewsDetail
-// @desc     Retreive a news details
+// @route    GET api/user/news/:newsID
+// @desc     Retrieve the details of news post.
 // @access   Private
-router.get('/news-detail', 
+router.get('/:newsID', 
     newsCtrl.getNewsDetail, 
     (req, res) => {
     res.status(200);
     res.send({
         "message": "News Details Retrieval Successful",
-        "newsData": req.newsData
     })
 });
 
+// @route    GET api/user/news/:categoryID
+// @desc     Retrieve all news of particular category
+// @access   Private
+router.get('/:newsID', 
+    newsCtrl.getNewsByCategory, 
+    (req, res) => {
+    res.status(200);
+    res.send({
+        "message": "News Retrieval of particular category Successful",
+    })
+});
 
 
 

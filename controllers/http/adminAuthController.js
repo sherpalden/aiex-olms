@@ -74,6 +74,7 @@ const registerAdmin = async (req, res, next) => {
             role: role.trim(),
             email: email.trim().toLowerCase(),
             password: req.hash || null,
+            isVerified = true
         })
         req.adminID = admin._id;
         debugger
@@ -111,8 +112,8 @@ const sendVerificationEmail = async (req, res, next) => {
 
 const verifyAdminEmail = async (req, res, next) => {
     try {
-        if(!req.body.emailVerificationToken) return next(new errObj.BadRequestError("emailVerificationToken field is required!!!"));
-        const token = req.body.emailVerificationToken;
+        if(!req.params.token) return next(new errObj.BadRequestError("token field required as url parameter!!!"));
+        const token = req.params.token;
         const decoded = await jwt.verify(token, process.env.EMAIL_VERIFICATION_SECRET);
         const email = decoded.email;
         const admin = await Admins.findOne({email: email});
@@ -156,7 +157,7 @@ const matchPassword = (req, res, next) => {
 const getToken = async (req, res, next) => {
     try {
         const email = req.body.email || req.email;
-        req.accessToken = await jwt.sign({ email: email.trim(), userID: req.userID },
+        req.accessToken = await jwt.sign({ email: email.trim(), adminID: req.adminID },
                                      process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5000m' });
         next();
     }
