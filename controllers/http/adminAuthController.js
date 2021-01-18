@@ -74,7 +74,7 @@ const registerAdmin = async (req, res, next) => {
             role: role.trim(),
             email: email.trim().toLowerCase(),
             password: req.hash || null,
-            isVerified = true
+            isVerified: true
         })
         req.adminID = admin._id;
         debugger
