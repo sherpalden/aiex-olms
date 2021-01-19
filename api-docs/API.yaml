@@ -546,13 +546,47 @@ paths:
 #******
 #******
 
+  /api/user/news/all-categories:
+    get:
+      tags:
+        - News Category APIs - User
+      description: Get all category list
+      responses:
+        201:
+          description: Response on successful retrieval of all category list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All category list retrieval successful"
+
+
+  /api/user/news/all-category-tree:
+    get:
+      tags:
+        - News Category APIs - User
+      description: Get all category list in tree view
+      responses:
+        201:
+          description: Response on successful retrieval of all category list in tree view
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All category list retrieval in tree view successful"
+
+
   /api/user/news/{newsID}:
     get:
       tags:
         - News APIs - User
       description: Get the details data of the particular news post
-      security:
-        - bearerAuth: []
       parameters:
         - in: path
           name: newsID
@@ -574,8 +608,6 @@ paths:
       tags:
         - News APIs - User
       description: Get all the news of the particular categoryID
-      security:
-        - bearerAuth: []
       parameters:
         - in: path
           name: categoryID
