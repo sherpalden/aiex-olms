@@ -354,6 +354,9 @@ paths:
                 youtubeLink:
                   type: string
                   example: https://youtu.be/QNInfBuBcOA
+                publishingAt:
+                  type: string
+                  example: 2020-20-1
       responses:
         200:
           description: Response on successful creation of news post.
@@ -428,6 +431,9 @@ paths:
                 imagesToBeDeleted:
                   type: array
                   example: ["img-1.jpg", "img-2.jpg"]
+                publishingAt:
+                  type: string
+                  example: 2020-20-1
       responses:
         200:
           description: Response on successful udpate of news post.
@@ -603,7 +609,7 @@ paths:
                     example: News post details retrieval successful
 
 
-  /api/user/news/{categoryID}:
+  /api/user/news/all-news/{categoryID}:
     get:
       tags:
         - News APIs - User

@@ -2,20 +2,16 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
 	try{
-		mongoose.set('useUnifiedTopology', true);
-		const conn = await mongoose.connect(
-			process.env.MONGO_URI, 
-			{
-				useNewUrlParser: true, 
-				useUnifiedTopology: true,
-				useCreateIndex: true
-			}
-		);
-		console.log('Database Connected.');
-	} 
+		const options = {
+			useNewUrlParser: true, 
+			useUnifiedTopology: true,
+			useCreateIndex: true
+		}
+		await mongoose.connect(process.env.MONGO_URI, options)
+		console.log("Database connected");
+	}
 	catch(err){
-		console.error(err.message);
-		process.exit(1);
+		console.error(err);
 	}
 }
 

@@ -271,7 +271,13 @@ const newsValidation = async (req, res, next) => {
 		if(req.body.categoryID.split('').length != 24) throw new errObj.BadRequestError("Invalid categoryID")
 		if(!req.body.metaTags) throw new errObj.BadRequestError("metaTags field is required.");
 		const metaTags = JSON.parse(req.body.metaTags);
-		if(metaTags.length < 3) throw new errObj.BadRequestError("At least 3 meta tags are required")
+		if(metaTags.length < 3) throw new errObj.BadRequestError("At least 3 meta tags are required");
+		if(!req.body.publishingAt){
+			throw new errObj.BadRequestError("publishingAt field is required.");
+		}
+		if(validationRule.dateValidation(req.body.publishingAt) === false){
+			throw new errObj.BadRequestError("Invalid publication Date format");
+		}
 		debugger
 		next();
 	}
@@ -297,6 +303,7 @@ const postNews = async (req, res, next) => {
 			images: req.images,
 			metaTags: JSON.parse(req.body.metaTags),
 			youtubeLink: req.body.youtubeLink || null,
+			publishingAt: req.body.publishingAt,
 			createdBy: adminID,
 		})
 		const rename = util.promisify(fs.rename);
@@ -408,6 +415,12 @@ const updateNews = async (req, res, next) => {
 		}
 		if(req.body.youtubeLink){
 			news.youtubeLink = req.body.youtubeLink;
+		}
+		if(req.body.publishingAt){
+			if(validationRule.dateValidation(req.body.publishingAt) === false){
+				return next(new errObj.BadRequestError("Invalid publishingAt Date format"));
+			}
+			news.publishingAt = req.body.publishingAt;
 		}
 		if(req.body.imagesToBeDeleted){
 			const imagesToBeDeleted = JSON.parse(req.body.imagesToBeDeleted);
@@ -522,6 +535,49 @@ const getNewsByCategory = async (req, res, next) => {
 	}
 }
 
+const getNewsByCategoryForUser = async (req, res, next) => {
+	try{
+		if(!req.params.categoryID) return next(new errObj.BadRequestError("categoryID is required as url parameter!"));
+		if(req.params.categoryID.split('').length != 24) return next(new errObj.BadRequestError('Invalid categoryID'))
+		const categoryID = mongoose.Types.ObjectId(req.params.categoryID);
+		const currentDate = Date.now();
+		const news = await News.aggregate([
+			// {$match: {categoryID: categoryID}},
+			{ $match: {$and: [{categoryID: categoryID}, {publishingAt: {$lte: new Date(currentDate)}}]}},
+			{$lookup: 
+				{ 
+					from: 'news_categories', 
+					pipeline: [
+						{ $match: {_id: categoryID}},
+						{ $project: {name: 1, _id: 0}}
+					],
+					as: 'categoryInfo'
+				}
+			},
+			{$unwind: '$categoryInfo'},
+			{$lookup: 
+				{ 
+					from: 'admins', 
+					let: { admin_id: "$createdBy" },
+					pipeline: [
+						{ $match: { $expr: { $eq: ["$_id", "$$admin_id"] } } },
+						{ $project: {firstName: 1, lastName: 1, role: 1 }}
+					],
+					as: 'adminInfo'
+				}
+			},
+			{$unwind: '$adminInfo'},
+		]);
+		req.news = news;
+		console.log(news[0]);
+		debugger
+		next();
+	}
+	catch(err){
+		next(err);
+	}
+}
+
 
 
 /*News functionality ends here*/
@@ -545,4 +601,5 @@ module.exports = {
 
 	getNewsDetail,
 	getNewsByCategory,
+	getNewsByCategoryForUser,
 }

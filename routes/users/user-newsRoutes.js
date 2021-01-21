@@ -33,7 +33,8 @@ router.get('/all-category-tree',
 });
 
 
-
+/*auto publishing*/
+/*sitemap SEO*/
 
 /*News APIs Begins*/
 
@@ -49,15 +50,16 @@ router.get('/:newsID',
     })
 });
 
-// @route    GET api/user/news/:categoryID
+// @route    GET api/user/news/all-news/:categoryID
 // @desc     Retrieve all news of particular category
 // @access   Private
-router.get('/:newsID', 
-    newsCtrl.getNewsByCategory, 
+router.get('/all-news/:categoryID', 
+    newsCtrl.getNewsByCategoryForUser, 
     (req, res) => {
     res.status(200);
     res.send({
         "message": "News Retrieval of particular category Successful",
+        "news": req.news
     })
 });
 

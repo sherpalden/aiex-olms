@@ -7,12 +7,15 @@ const bodyParser = require('body-parser');
 const connectDB = require('./db/dbconfig.js');
 connectDB();
 
-
+//middleware to parse json strings to objects.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+//define path to serve static files 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'client')));
 
+//enable cors
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -45,7 +48,7 @@ app.get('/', (req, res) => {res.send("aiex-olms running...")});
 
 // error handler
 const { UserFacingError } = require('./error/errorHandler.js');
-app.use( (err, req, res, next) => {
+app.use( (err, req, res) => {
 	if(err instanceof UserFacingError){
 		res.status(err.statusCode).send({"error": err.message})
 		return;

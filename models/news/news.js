@@ -29,6 +29,9 @@ const NewsSchema = new mongoose.Schema({
   youtubeLink: {
     type: String
   },
+  publishingAt: {
+    type: Date,
+  },
   createdBy: {
     type: mongoose.Types.ObjectId,
     required: true
