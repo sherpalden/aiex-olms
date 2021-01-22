@@ -23,10 +23,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// bodyParser
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
 //userRoutes
 const userRoutes = require('./routes/users/userRoutes.js');
 app.use('/api/user', userRoutes);
@@ -34,12 +30,20 @@ app.use('/api/user', userRoutes);
 const userNewsRoutes = require('./routes/users/user-newsRoutes.js');
 app.use('/api/user/news', userNewsRoutes);
 
+const userDictionaryRoutes = require('./routes/users/user-dictionaryRoutes');
+app.use('/api/user/dictionary', userDictionaryRoutes);
+
 //adminRoutes
 const adminRoutes = require('./routes/admin/adminRoutes.js');
 app.use('/api/admin', adminRoutes);
 
 const adminNewsRoutes = require('./routes/admin/admin-newsRoutes.js');
 app.use('/api/admin/news', adminNewsRoutes);
+
+const adminDictionaryRoutes = require('./routes/admin/admin-dictionaryRoutes.js');
+app.use('/api/admin/dictionary', adminDictionaryRoutes);
+
+
 
 const swaggerRoutes = require('./routes/swaggerRoutes.js');
 app.use('/api/swagger', swaggerRoutes);

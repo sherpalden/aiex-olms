@@ -335,7 +335,7 @@ const deleteNews = async (req, res, next) => {
 		for(image of news.images){
 			await fileDeleter.deleteFile(`./public/uploads/news/${image}`);
 		}
-		await news.deleteOne({_id: newsID});
+		await News.deleteOne({_id: newsID});
 		debugger
 		next();
 	}

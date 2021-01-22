@@ -629,6 +629,163 @@ paths:
                     type: string
                     example: News posts of particular categoryID retrieval successful
 
+#******
+#******
+#******
+#******
+#******
+#******
+
+  /api/admin/dictionary:
+    post:
+      tags:
+        - Dictionary APIs - Admin
+      description: Create a dictionary post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                keyword:
+                  type: string
+                  example: Frame
+                description:
+                  type: string
+                  example: It is a structural design of building.
+                youtubeLinks:
+                  type: array
+                  example: ["https://youtu.be/QNInfBuBcOA"]
+                relatedWords:
+                  type: array
+                  example: ["beam", "building", "structure"]
+      responses:
+        200:
+          description: Response on successful creation of dictionary post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: dictionary Post Creation Successful
+
+
+  /api/admin/dictionary/{dictionaryID}:
+    put:
+      tags:
+        - Dictionary APIs - Admin
+      description: Update a dictionary post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: dictionaryID
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                imagesToBeDeleted:
+                  type: array
+                  example: ["img-1.jpg", "img-2.jpg"]
+                keyword:
+                  type: string
+                  example: Frame
+                description:
+                  type: string
+                  example: It is a structural design of building.
+                youtubeLinks:
+                  type: array
+                  example: ["https://youtu.be/QNInfBuBcOA"]
+                relatedWords:
+                  type: array
+                  example: ["beam", "building", "structure"]
+      responses:
+        200:
+          description: Response on successful Update of dictionary post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: dictionary Post Update Successful
+
+    delete:
+      tags:
+        - Dictionary APIs - Admin
+      description: Delete a dictionary post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: dictionaryID
+      responses:
+        200:
+          description: Response on successful Delete of dictionary post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: dictionary Post Delete Successful
+
+
+  /api/admin/dictionary/search:
+    get:
+      tags:
+        - Dictionary APIs - Admin
+      description: Search a dictionary post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: searchKey
+        - in: query
+          name: skips
+        - in: query
+          name: limit
+     
+      responses:
+        200:
+          description: Response on successful Search of dictionary post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: dictionary Post Search Successful
+
+
+#******
+#******
+#******
+#******
+#******
+#******
+
 
 components:
   securitySchemes:
