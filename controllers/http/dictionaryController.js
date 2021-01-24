@@ -6,7 +6,7 @@ const path = require('path');
 const is = require('type-is');
 const util = require('util');
 const appendField = require('append-field');
-
+const excelToJson = require('convert-excel-to-json');
 //require database models
 const Users = require('../../models/users/users.js');
 const Admins = require('../../models/users/admins.js');
@@ -111,6 +111,84 @@ const postDictionary = async (req, res, next) => {
 		}
 		next(err);
     }
+}
+
+const uploadCsvDictionary = async (req, res, next) => {
+    let filesUploaded = [];
+	try {
+		if(!is(req, ['multipart'])) return next(new errObj.BadRequestError("The content type must be multipart/form-data"));
+        const busboy = new Busboy({headers: req.headers, highWaterMark: 2 * 1024 * 1024});
+      
+        busboy.on('file', (key, file, name, encoding, mimetype) => {
+        	try{
+	            const fileExt = path.extname(name);
+	            const fileNameSplitted = name.split('.');
+	            const filename = fileNameSplitted[fileNameSplitted.length - 2] + '-' + Date.now() + fileExt;
+	            if(fileExt === '.xlsx'){
+	                filesUploaded.push(`./public/uploads/temp/${filename}`);
+	            	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
+	            }
+	            else {
+	                return next(new errObj.BadRequestError("Invalid file type!!! file type must be .xlsx"));
+	            }
+        	}
+        	catch(err){return next(err)}
+        });
+        busboy.on('finish', (err) => {
+            if (err) return next(err)
+            req.filesUploaded = filesUploaded;
+            debugger
+            next();
+        });
+        req.pipe(busboy);
+	}
+    catch(err) {
+    	try {
+			await fileDeleter.deleteFiles(filesUploaded);
+		}
+		catch(err){
+			next(err);
+		}
+        next(err)
+    }	
+}
+
+const bulkPostDictionary = async (req, res, next) => {
+	try{
+		if(req.filesUploaded.length < 1) throw new errObj.BadRequestError(".xlsx file required");
+		const readXlsxFile = util.promisify(fs.readFile);
+		const xlsx = await readXlsxFile(req.filesUploaded[0]);
+		
+		const result = excelToJson({
+    		source: xlsx
+		});
+		if(result.Sheet1.length < 2) throw new errObj.BadRequestError("At least one row of data is required.");
+		if(result.Sheet1[0].A !== "keyword" || result.Sheet1[0].B !== "description"){
+			throw new errObj.BadRequestError("Columns should be keyword and description");
+		}
+		let dictArray = [];
+		for(let i = 1; i < result.Sheet1.length; i++){
+			if((validationRule.notEmptyValidation(result.Sheet1[i].A) === false) || (validationRule.notEmptyValidation(result.Sheet1[i].B) === false)){
+				continue;
+			}
+			dictArray.push({
+				keyword: result.Sheet1[i].A,
+				description: result.Sheet1[i].B
+			})
+		}
+		await Dictionary.insertMany(dictArray); 
+		await fileDeleter.deleteFiles(req.filesUploaded);
+		next();
+	}
+	catch(err){
+		try {
+			await fileDeleter.deleteFiles(req.filesUploaded);
+		}
+		catch(err){
+			next(err);
+		}
+        next(err)
+	}
 }
 
 const updateDictionary = async (req, res, next) => {
@@ -238,6 +316,9 @@ module.exports = {
 	postDictionary,
 	updateDictionary,
 	deleteDictionary,
+
+	uploadCsvDictionary,
+	bulkPostDictionary,
 
 	searchDictionary,
 	searchDictionary_v1,

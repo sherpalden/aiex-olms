@@ -21,6 +21,17 @@ router.post('/',
     })
 });
 
+router.post('/bulk-upload', 
+    adminAuthCtrl.tokenVerification,
+    dictionaryCtrl.uploadCsvDictionary,
+    dictionaryCtrl.bulkPostDictionary,
+    (req, res) => {    
+    res.status(200);
+    res.send({
+        "message": "Dictionary Bulk upload Successful",
+    })
+});
+
 // @route    PUT api/admin/dictionary/:dictionaryID
 // @desc     Update a dictionary
 // @access   Private

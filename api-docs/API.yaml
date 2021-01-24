@@ -680,6 +680,37 @@ paths:
                     example: dictionary Post Creation Successful
 
 
+  /api/admin/dictionary/bulk-upload:
+    post:
+      tags:
+        - Dictionary APIs - Admin
+      description: Bulk upload dictionary
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  
+      responses:
+        200:
+          description: Response on successful bulk upload of dictionary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: dictionary bulk upload Successful
+
+
   /api/admin/dictionary/{dictionaryID}:
     put:
       tags:
