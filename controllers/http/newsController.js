@@ -131,7 +131,6 @@ const deleteCategory = async (req, res, next) => {
 					if(category._id === nodeID) {
 						return category;
 					}
-					console.log(category.name)
 					findSubTree(nodeID, category);
 				}
 				// for(category of root.children){
@@ -349,7 +348,6 @@ const deleteNewsByCategory = async (req, res, next) => {
 		if(!req.params.categoryID) return next(new errObj.BadRequestError("categoryID is required as url parameter!"));
 		if(req.params.categoryID.split('').length != 24) return next(new errObj.BadRequestError('Invalid categoryID'));
 		const categoryID = mongoose.Types.ObjectId(req.params.categoryID);
-		console.log(categoryID)
 		const allNews = await News.find({categoryID: categoryID});
 		if(allNews.length < 1) return next(new errObj.NotFoundError("No news found to delete."));
 		for(news of allNews){
@@ -569,7 +567,6 @@ const getNewsByCategoryForUser = async (req, res, next) => {
 			{$unwind: '$adminInfo'},
 		]);
 		req.news = news;
-		console.log(news[0]);
 		debugger
 		next();
 	}

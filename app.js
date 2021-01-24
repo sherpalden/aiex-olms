@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 
 //define path to serve static files 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'client')));
+// app.use(express.static(path.join(__dirname, 'client')));
 
 //enable cors
 app.use((req, res, next) => {
@@ -22,6 +22,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'content-type,X-Requested-With,authorization');
     next();
 });
+
 
 //userRoutes
 const userRoutes = require('./routes/users/userRoutes.js');
@@ -52,7 +53,7 @@ app.get('/', (req, res) => {res.send("aiex-olms running...")});
 
 // error handler
 const { UserFacingError } = require('./error/errorHandler.js');
-app.use( (err, req, res) => {
+app.use( (err, req, res, next) => {
 	if(err instanceof UserFacingError){
 		res.status(err.statusCode).send({"error": err.message})
 		return;
