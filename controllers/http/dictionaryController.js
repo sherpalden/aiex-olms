@@ -91,8 +91,8 @@ const postDictionary = async (req, res, next) => {
 			keyword: req.body.keyword,
 			description: req.body.description,
 			images: req.images,
-			relatedWords: req.body.relatedWords || null,
-			youtubeLinks: req.body.youtubeLinks || null,
+			relatedWords: JSON.parse(req.body.relatedWords) || null,
+			youtubeLinks: JSON.parse(req.body.youtubeLinks) || null,
 		})
 		const rename = util.promisify(fs.rename);
 		for(file of req.images){
@@ -209,10 +209,10 @@ const updateDictionary = async (req, res, next) => {
 			}
 		}
 		if(req.body.relatedWords){
-			dictionary.relatedWords = req.body.relatedWords;
+			dictionary.relatedWords = JSON.parse(req.body.relatedWords);
 		}
 		if(req.body.youtubeLinks){
-			dictionary.youtubeLinks = req.body.youtubeLinks;
+			dictionary.youtubeLinks = JSON.parse(req.body.youtubeLinks);
 		}
 		if(req.body.imagesToBeDeleted){
 			const imagesToBeDeleted = JSON.parse(req.body.imagesToBeDeleted);
@@ -246,7 +246,7 @@ const deleteDictionary = async (req, res, next) => {
 		const dictionaryID = mongoose.Types.ObjectId(req.params.dictionaryID);
 		const dictionary = await Dictionary.findOne({_id: dictionaryID});
 		if(!dictionary) return next(new errObj.NotFoundError("Dictionary corresponding to the dictionaryID not found"));
-		for(image of news.images){
+		for(image of dictionary.images){
 			await fileDeleter.deleteFile(`./public/uploads/dictionary/${image}`);
 		}
 		await Dictionary.deleteOne({_id: dictionaryID});

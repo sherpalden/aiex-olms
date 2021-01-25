@@ -62,5 +62,10 @@ app.use( (err, req, res, next) => {
 	res.json(err.message);
 });
 
+process.on('uncaughtException', err => {
+  console.error('uncaughtError', err)
+  process.exit(1) //mandatory (as per the Node.js docs)
+})
+
 module.exports = app;
 
