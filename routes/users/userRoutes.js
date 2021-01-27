@@ -120,5 +120,23 @@ router.get('/profile',
     })
 });
 
+// const {gfsUpload, deleteGfsFile, getGfsImage} = require('../../middlewares/gfsUpload.js');
+// router.post('/gfs-upload', gfsUpload, async (req, res) => {
+//     res.status(200);
+//     res.send({
+//         "message": "GridFs Upload Successfull"
+//     });
+// })
+
+// router.delete('/gfs-delete/:fileID', deleteGfsFile, async (req, res) => {
+//     res.status(200);
+//     res.send({
+//         "message": "GridFs Delete Successfull"
+//     });
+// })
+
+// router.get('/gfs-image/:imgName', getGfsImage);
+
+
 module.exports = router;
 

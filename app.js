@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 
 //define path to serve static files 
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(express.static(path.join(__dirname, 'client')));
+app.use(express.static(path.join(__dirname, 'client')));
 
 //enable cors
 app.use((req, res, next) => {
@@ -34,6 +34,9 @@ app.use('/api/user/news', userNewsRoutes);
 const userDictionaryRoutes = require('./routes/users/user-dictionaryRoutes');
 app.use('/api/user/dictionary', userDictionaryRoutes);
 
+const userBookRoutes = require('./routes/users/user-bookRoutes.js');
+app.use('/api/user/book', userBookRoutes);
+
 //adminRoutes
 const adminRoutes = require('./routes/admin/adminRoutes.js');
 app.use('/api/admin', adminRoutes);
@@ -43,6 +46,9 @@ app.use('/api/admin/news', adminNewsRoutes);
 
 const adminDictionaryRoutes = require('./routes/admin/admin-dictionaryRoutes.js');
 app.use('/api/admin/dictionary', adminDictionaryRoutes);
+
+const adminBookRoutes = require('./routes/admin/admin-bookRoutes.js');
+app.use('/api/admin/book', adminBookRoutes);
 
 
 

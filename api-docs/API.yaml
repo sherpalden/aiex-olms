@@ -348,9 +348,6 @@ paths:
                 description:
                   type: string
                   example: News description here
-                metaTags:
-                  type: array
-                  example: ["tag-1", "tag-2", "tag-3"]
                 youtubeLink:
                   type: string
                   example: https://youtu.be/QNInfBuBcOA
@@ -808,6 +805,188 @@ paths:
                   message:
                     type: string
                     example: dictionary Post Search Successful
+
+
+#******
+#******
+#******
+#******
+#******
+#******
+
+
+#******
+#******
+#******
+#******
+#******
+#******
+
+
+  /api/admin/book/add-topic:
+    post:
+      tags:
+        - Books APIs - Admin
+      description: Add a book topic
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                bookTopic:
+                  type: string
+                  example: Frame
+      responses:
+        200:
+          description: Response on successful addition of topic.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Book topic added successfully
+
+
+  /api/admin/book/rename-topic:
+    put:
+      tags:
+        - Books APIs - Admin
+      description: Rename a book topic
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                topicName:
+                  type: string
+                  example: Engineering
+                topicID:
+                  type: string
+                  example: adfgsdfard456456456dfg
+      responses:
+        200:
+          description: Response on successful rename of topic.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Book topic renamed successfully
+
+
+  /api/admin/book/topics:
+    get:
+      tags:
+        - Books APIs - Admin
+      description: Get All book topics
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Response on successful retrieval of book topics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Book topics retrieval successfull
+
+
+# 'title', 'abstract', 'topicID', 'publisher', 'edition', 'publicationDate', 'isbn', 'doi'
+  /api/admin/book:
+    post:
+      tags:
+        - Books APIs - Admin
+      description: Create a book post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                title:
+                  type: string
+                  example: Frame
+                authors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                        example: Palden
+                      lastName:
+                        type: string
+                        example: Sherpa
+                edition:
+                  type: string
+                  example: Frame
+                abstract:
+                  type: string
+                  example: It is a structural design of building.
+                topicID:
+                  type: array
+                  example: ["https://youtu.be/QNInfBuBcOA"]
+                publisher:
+                  type: array
+                  example: ["beam", "building", "structure"]
+                publicationDate:
+                  type: string
+                  example: Frame
+                isbn:
+                  type: string
+                  example: Frame
+                doi:
+                  type: string
+                  example: Frame
+      responses:
+        200:
+          description: Response on successful creation of book post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: book Post Creation Successful
+
+#******
+#******
+#******
+#******
+#******
+#******
+
+
+#******
+#******
+#******
+#******
+#******
+#******
 
 
 #******
