@@ -826,7 +826,7 @@ paths:
   /api/admin/book/add-main-category:
     post:
       tags:
-        - Book Category APIs - Admin
+        - Book APIs - Admin
       description: Add main book category
       security:
         - bearerAuth: []
@@ -857,7 +857,7 @@ paths:
   /api/admin/book/add-sub-category:
     post:
       tags:
-        - Book Category APIs - Admin
+        - Book APIs - Admin
       description: Add sub category for book
       security:
         - bearerAuth: []
@@ -891,7 +891,7 @@ paths:
   /api/admin/book/rename-category:
     put:
       tags:
-        - Book Category APIs - Admin
+        - Book APIs - Admin
       description: Rename a category for book
       security:
         - bearerAuth: []
@@ -925,7 +925,7 @@ paths:
   # /api/admin/book/delete-category/{categoryID}:
   #   delete:
   #     tags:
-  #       - Book Category APIs - Admin
+  #       - Book APIs - Admin
   #     description: Deletes all the sub categories and book associated with them including the category itself.
   #     security:
   #       - bearerAuth: []
@@ -948,7 +948,7 @@ paths:
   /api/admin/book/all-categories:
     get:
       tags:
-        - Book Category APIs - Admin
+        - Book APIs - Admin
       description: Get all category list of Books
       security:
         - bearerAuth: []
@@ -1222,6 +1222,123 @@ paths:
 #******
 #******
 
+  /api/admin/course/add-main-category:
+    post:
+      tags:
+        - Course APIs - Admin
+      description: Add main course category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: Science and myths
+                  
+      responses:
+        200:
+          description: Response on successful addition of main course category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Course main category addition successful"
+
+
+  /api/admin/course/add-sub-category:
+    post:
+      tags:
+        - Course APIs - Admin
+      description: Add sub category for course
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: Animal
+                parentID:
+                  type: string
+                  example: adfadf7987sdfs98798sdf
+                  
+      responses:
+        200:
+          description: Response on successful addition of sub category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Course sub category addition successful"
+
+
+  /api/admin/course/rename-category:
+    put:
+      tags:
+        - Course APIs - Admin
+      description: Rename a category for course
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                newName:
+                  type: string
+                  example: Animal
+                categoryID:
+                  type: string
+                  example: adfadf7987sdfs98798sdf
+                  
+      responses:
+        200:
+          description: Response on successful rename of a category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category rename successful"
+
+
+  /api/admin/course/all-categories:
+    get:
+      tags:
+        - Course APIs - Admin
+      description: Get all category list of Books
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Response on successful retrieval of all category list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All category list retrieval successful"
 
 #******
 #******

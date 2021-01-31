@@ -261,19 +261,19 @@ const uploadNewsFiles = async (req, res, next) => {
 
 const newsValidation = async (req, res, next) => {
 	try {
-		const requiredFields = ['title', 'categoryID', 'description'];
+		const requiredFields = ['title', 'categoryID', 'publishingAt', 'description'];
 		for(field of requiredFields){
 			if(!req.body[field] || (validationRule.notEmptyValidation(req.body[field]) === false)){
 				throw new errObj.BadRequestError(`${field} field is required and cannot be empty.`);
 			}
 		}
 		if(req.body.categoryID.split('').length != 24) throw new errObj.BadRequestError("Invalid categoryID")
-		if(!req.body.publishingAt){
-			throw new errObj.BadRequestError("publishingAt field is required.");
-		}
-		if(validationRule.dateValidation(req.body.publishingAt) === false){
-			throw new errObj.BadRequestError("Invalid publication Date format");
-		}
+		// if(!req.body.publishingAt){
+		// 	throw new errObj.BadRequestError("publishingAt field is required.");
+		// }
+		// if(validationRule.dateValidation(req.body.publishingAt) === false){
+		// 	throw new errObj.BadRequestError("Invalid publication Date format");
+		// }
 		debugger
 		next();
 	}

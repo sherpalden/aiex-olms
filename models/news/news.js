@@ -21,11 +21,6 @@ const NewsSchema = new mongoose.Schema({
       type: String
     }
   ],
-  metaTags: [
-    {
-      type: String
-    }
-  ],  
   youtubeLink: {
     type: String
   },
