@@ -37,6 +37,9 @@ app.use('/api/user/dictionary', userDictionaryRoutes);
 const userBookRoutes = require('./routes/users/user-bookRoutes.js');
 app.use('/api/user/book', userBookRoutes);
 
+const userCourseRoutes = require('./routes/users/user-courseRoutes.js');
+app.use('/api/user/course', userCourseRoutes);
+
 //adminRoutes
 const adminRoutes = require('./routes/admin/adminRoutes.js');
 app.use('/api/admin', adminRoutes);
@@ -50,6 +53,9 @@ app.use('/api/admin/dictionary', adminDictionaryRoutes);
 const adminBookRoutes = require('./routes/admin/admin-bookRoutes.js');
 app.use('/api/admin/book', adminBookRoutes);
 
+const adminCourseRoutes = require('./routes/admin/admin-courseRoutes.js');
+app.use('/api/admin/course', adminCourseRoutes);
+
 
 
 const swaggerRoutes = require('./routes/swaggerRoutes.js');
@@ -60,6 +66,7 @@ app.get('/', (req, res) => {res.send("aiex-olms running...")});
 // error handler
 const { UserFacingError } = require('./error/errorHandler.js');
 app.use( (err, req, res, next) => {
+	console.error(err)
 	if(err instanceof UserFacingError){
 		res.status(err.statusCode).send({"error": err.message})
 		return;

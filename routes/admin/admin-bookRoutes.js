@@ -6,47 +6,57 @@ const adminAuthCtrl = require('../../controllers/http/adminAuthController.js')
 const bookCtrl = require('../../controllers/http/bookController.js')
 
 
-// @route    POST api/admin/book/add-topic
-// @desc     Add topic for books
+// @route    POST api/admin/book/add-main-category
+// @desc     Add a main category for the book.
 // @access   Private
-router.post('/add-topic', 
+router.post('/add-main-category', 
     adminAuthCtrl.tokenVerification,
-    bookCtrl.addBookTopic, 
-    (req, res) => {    
+    bookCtrl.addMainBookCategory, 
+    (req, res) => {
     res.status(200);
     res.send({
-        "message": "Book Topic Addition Successful",
-        "topic": req.topic
+        "message": "Book Main Category Addition Successful"
+    })
+});
+
+// @route    POST api/admin/book/add-sub-category
+// @desc     Add a sub category for the book.
+// @access   Private
+router.post('/add-sub-category', 
+    adminAuthCtrl.tokenVerification,
+    bookCtrl.addSubBookCategory, 
+    (req, res) => {
+    res.status(200);
+    res.send({
+        "message": "Book Sub Category Addition Successful"
+    })
+});
+
+// @route    PUT api/admin/book/rename-category
+// @desc     Rename a category for the book.
+// @access   Private
+router.put('/rename-category', 
+    adminAuthCtrl.tokenVerification,
+    bookCtrl.renameBookCategory, 
+    (req, res) => {
+    res.status(200);
+    res.send({
+        "message": "Book Category Rename Successful"
     })
 });
 
 
-// @route    POST api/admin/book/rename-topic
-// @desc     Rename a book topic
+// @route    GET api/admin/book/all-categories
+// @desc     Retrieve all categories of books
 // @access   Private
-router.put('/rename-topic', 
-    adminAuthCtrl.tokenVerification,
-    bookCtrl.renameBookTopic, 
-    (req, res) => {    
+router.get('/all-categories',
+    adminAuthCtrl.tokenVerification, 
+    bookCtrl.getAllBookCategory, 
+    (req, res) => {
     res.status(200);
     res.send({
-        "message": "Book Topic Rename Successful",
-        "topic": req.topic
-    })
-});
-
-
-// @route    POST api/admin/book/topics
-// @desc     Get all book topics
-// @access   Private
-router.get('/topics', 
-    adminAuthCtrl.tokenVerification,
-    bookCtrl.getBookTopics, 
-    (req, res) => {    
-    res.status(200);
-    res.send({
-        "message": "Book Topics Retrieval Successful",
-        "bookTopics": req.bookTopics
+        "message": "All Categories of Book Retrieval Successful",
+        "categories": req.categories
     })
 });
 
@@ -87,6 +97,7 @@ router.put('/update-details/:bookID',
 // @access   Private
 router.put('/update-files/:bookID', 
     adminAuthCtrl.tokenVerification,
+    bookCtrl.uploadBookFiles,
     bookCtrl.updateBookFiles, 
     (req, res) => {    
     res.status(200);
@@ -122,20 +133,29 @@ router.get('/:bookID',
     })
 });
 
-// @route    GET api/admin/book/all-books/:topicID
-// @desc     Get all books of partucular of topicID
+// @route    GET api/admin/book/all-books/:categoryID
+// @desc     Get all books of partucular categoryID
 // @access   Private
-router.get('/all-books/:topicID', 
+router.get('/all-books/:categoryID', 
     adminAuthCtrl.tokenVerification,
-    bookCtrl.getBookDetails, 
+    bookCtrl.getBooksByCategory, 
     (req, res) => {    
     res.status(200);
     res.send({
-        "message": "Books of particular topicID Retreived Successfully",
+        "message": "Books of particular categoryID Retreived Successfully",
         "books": req.books,
         "total": req.total,
         "nextSkips": req.nextSkips,
     })
 });
+
+router.post('/form-data',
+    bookCtrl.parseFormData,
+    (req, res) => {
+        res.status(200)
+        res.send({
+            "message": "Parse Successful"
+        })
+    })
 
 module.exports = router

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const BookSchema = new mongoose.Schema({
+const CourseSchema = new mongoose.Schema({
 	title: { type: String, required: true },
 	authors: [{ 
 		firstName: {type: String},
@@ -19,6 +19,6 @@ const BookSchema = new mongoose.Schema({
 	updatedAt: { type: Date }
 })
 
-const Books = mongoose.model('Book', BookSchema)
+const Courses = mongoose.model('Course', CourseSchema)
 
-module.exports = Books
+module.exports = Courses

@@ -823,11 +823,11 @@ paths:
 #******
 
 
-  /api/admin/book/add-topic:
+  /api/admin/book/add-main-category:
     post:
       tags:
-        - Books APIs - Admin
-      description: Add a book topic
+        - Book Category APIs - Admin
+      description: Add main book category
       security:
         - bearerAuth: []
       requestBody:
@@ -837,12 +837,13 @@ paths:
             schema:
               type: object
               properties:
-                bookTopic:
+                categoryName:
                   type: string
-                  example: Frame
+                  example: Science and myths
+                  
       responses:
         200:
-          description: Response on successful addition of topic.
+          description: Response on successful addition of main book category
           content:
             application/json:
               schema:
@@ -850,14 +851,48 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Book topic added successfully
+                    example: "book main category addition successful"
 
 
-  /api/admin/book/rename-topic:
+  /api/admin/book/add-sub-category:
+    post:
+      tags:
+        - Book Category APIs - Admin
+      description: Add sub category for book
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: Animal
+                parentID:
+                  type: string
+                  example: adfadf7987sdfs98798sdf
+                  
+      responses:
+        200:
+          description: Response on successful addition of sub category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "book sub category addition successful"
+
+
+  /api/admin/book/rename-category:
     put:
       tags:
-        - Books APIs - Admin
-      description: Rename a book topic
+        - Book Category APIs - Admin
+      description: Rename a category for book
       security:
         - bearerAuth: []
       requestBody:
@@ -867,15 +902,16 @@ paths:
             schema:
               type: object
               properties:
-                topicName:
+                newName:
                   type: string
-                  example: Engineering
-                topicID:
+                  example: Animal
+                categoryID:
                   type: string
-                  example: adfgsdfard456456456dfg
+                  example: adfadf7987sdfs98798sdf
+                  
       responses:
         200:
-          description: Response on successful rename of topic.
+          description: Response on successful rename of a category
           content:
             application/json:
               schema:
@@ -883,19 +919,42 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Book topic renamed successfully
+                    example: "Category rename successful"
 
 
-  /api/admin/book/topics:
+  # /api/admin/book/delete-category/{categoryID}:
+  #   delete:
+  #     tags:
+  #       - Book Category APIs - Admin
+  #     description: Deletes all the sub categories and book associated with them including the category itself.
+  #     security:
+  #       - bearerAuth: []
+  #     parameters:
+  #       - in: path
+  #         name: categoryID
+  #     responses:
+  #       200:
+  #         description: Response on successful deletion of a category
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   type: string
+  #                   example: "Category delete successful"
+
+
+  /api/admin/book/all-categories:
     get:
       tags:
-        - Books APIs - Admin
-      description: Get All book topics
+        - Book Category APIs - Admin
+      description: Get all category list of Books
       security:
         - bearerAuth: []
       responses:
         200:
-          description: Response on successful retrieval of book topics
+          description: Response on successful retrieval of all category list
           content:
             application/json:
               schema:
@@ -903,10 +962,11 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Book topics retrieval successfull
+                    example: "All category list retrieval successful"
 
 
-# 'title', 'abstract', 'topicID', 'publisher', 'edition', 'publicationDate', 'isbn', 'doi'
+
+
   /api/admin/book:
     post:
       tags:
@@ -921,14 +981,15 @@ paths:
             schema:
               type: object
               properties:
-                files:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
+                thumbnail:
+                  type: string
+                  format: binary
+                bookPdf:
+                  type: string
+                  format: binary
                 title:
                   type: string
-                  example: Frame
+                  example: Earthquake Resistent Building Design
                 authors:
                   type: array
                   items:
@@ -942,25 +1003,25 @@ paths:
                         example: Sherpa
                 edition:
                   type: string
-                  example: Frame
+                  example: 2nd(Updated)
                 abstract:
                   type: string
                   example: It is a structural design of building.
-                topicID:
-                  type: array
-                  example: ["https://youtu.be/QNInfBuBcOA"]
+                categoryID:
+                  type: string
+                  example: 5454sdfasd54545sdf
                 publisher:
-                  type: array
-                  example: ["beam", "building", "structure"]
+                  type: string
+                  example: Cambridge University Press
                 publicationDate:
                   type: string
-                  example: Frame
+                  example: 2020-01-02
                 isbn:
                   type: string
-                  example: Frame
+                  example: 978-3-16-148410-0
                 doi:
                   type: string
-                  example: Frame
+                  example: 10.1371/journal.pgen.1001111
       responses:
         200:
           description: Response on successful creation of book post.
@@ -972,6 +1033,179 @@ paths:
                   message:
                     type: string
                     example: book Post Creation Successful
+
+
+  /api/admin/book/update-details/{bookID}:
+    put:
+      tags:
+        - Books APIs - Admin
+      description: Update a book post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookID
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Earthquake Resistent Building Design
+                authors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                        example: Palden
+                      lastName:
+                        type: string
+                        example: Sherpa
+                edition:
+                  type: string
+                  example: 2nd(Updated)
+                abstract:
+                  type: string
+                  example: It is a structural design of building.
+                categoryID:
+                  type: string
+                  example: 5454sdfasd54545sdf
+                publisher:
+                  type: string
+                  example: Cambridge University Press
+                publicationDate:
+                  type: string
+                  example: 2020-01-02
+                isbn:
+                  type: string
+                  example: 978-3-16-148410-0
+                doi:
+                  type: string
+                  example: 10.1371/journal.pgen.1001111
+      responses:
+        200:
+          description: Response on successful update of book post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: book Post Update Successful
+
+
+  /api/admin/book/update-files/{bookID}:
+    put:
+      tags:
+        - Books APIs - Admin
+      description: Update a book files
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookID
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                thumbnail:
+                  type: string
+                  format: binary
+                pdf:
+                  type: string
+                  format: binary
+                
+      responses:
+        200:
+          description: Response on successful update of book files.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: book files Update Successful
+
+
+  /api/admin/book/{bookID}:
+    get:
+      tags:
+        - Books APIs - Admin
+      description: Get details of a book
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookID
+      responses:
+        200:
+          description: Response on successful retrieval of book details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: book details retrieval Successful
+
+    delete:
+      tags:
+        - Books APIs - Admin
+      description: Delete a book post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookID
+      responses:
+        200:
+          description: Response on successful deletion of book post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: book Post Delete Successful
+
+
+  /api/admin/book/all-books/{categoryID}:
+    get:
+      tags:
+        - Books APIs - Admin
+      description: Get all books of particular topic
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+        - in: query
+          name: skips
+        - in: query
+          name: limit
+      responses:
+        200:
+          description: Response on successful retrieval of books of particular categoryID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Books of particular categoryID retrieval successful
 
 #******
 #******

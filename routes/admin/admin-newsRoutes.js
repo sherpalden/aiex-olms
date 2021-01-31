@@ -192,7 +192,9 @@ router.get('/all-news/:categoryID',
     res.status(200);
     res.send({
         "message": "News Retrieval of particular category Successful",
-        "news": req.news
+        "news": req.news,
+        // "total": req.total,
+        // "nextSkips": req.nextSkips
     })
 });
 
