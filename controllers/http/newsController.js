@@ -288,13 +288,14 @@ const newsValidation = async (req, res, next) => {
 	}
 }
 
+
 const postNews = async (req, res, next) => {
 	try {
 		const adminID = req.adminID;
 		const newsData = await News.create({ 
 			title: req.body.title,
 			categoryID: req.body.categoryID,
-			description: req.body.description,
+			description: JSON.parse(req.body.description),
 			thumbnail: req.images[0] || null,
 			images: req.images,
 			youtubeLink: req.body.youtubeLink || null,

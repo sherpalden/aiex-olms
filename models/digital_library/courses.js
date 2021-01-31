@@ -7,14 +7,10 @@ const CourseSchema = new mongoose.Schema({
 		lastName: {type: String},
 	}],
 	categoryID: { type: mongoose.Types.ObjectId, required: true },
-	publisher: { type: String, required: true },
-	abstract: { type: String, required: true },
-	edition: { type: String, required: true },
-	publicationDate: { type: Date, required: true },
-	isbn: { type: String, required: true },
-	doi: { type: String, required: true},
+	level: { type: String },
+	description: { type: String, required: true },
 	thumbnail: { type: String, required: true },
-	pdf: { type: String, required: true },
+	files: [{ type: String }],
 	createdAt: { type: Date, default: Date.now },
 	updatedAt: { type: Date }
 })

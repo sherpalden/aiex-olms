@@ -13,7 +13,7 @@ const NewsSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
   },
   description: {
-    type: String,
+    type: Object,
     required: true
   },
   images: [
