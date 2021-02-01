@@ -319,6 +319,38 @@ paths:
 #******
 #******
 #******
+
+  /api/admin/news/upload-images:
+    post:
+      tags:
+        - News APIs - Admin
+      description: Upload news images
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              
+      responses:
+        200:
+          description: Response on successful upload of news images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: News Images Upload Successful
   
   /api/admin/news:
     post:
@@ -334,11 +366,14 @@ paths:
             schema:
               type: object
               properties:
-                files:
+                # files:
+                #   type: array
+                #   items:
+                #     type: string
+                #     format: binary
+                images:
                   type: array
-                  items:
-                    type: string
-                    format: binary
+                  example: ["img1.jpg", "img2.jpg"]
                 title:
                   type: string
                   example: Nepal is a agricultural country but we import agro products from India.

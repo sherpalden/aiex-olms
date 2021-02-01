@@ -8,7 +8,7 @@ const CourseSchema = new mongoose.Schema({
 	}],
 	categoryID: { type: mongoose.Types.ObjectId, required: true },
 	level: { type: String },
-	description: { type: String, required: true },
+	description: { type: Object, required: true },
 	thumbnail: { type: String, required: true },
 	files: [{ type: String }],
 	createdAt: { type: Date, default: Date.now },

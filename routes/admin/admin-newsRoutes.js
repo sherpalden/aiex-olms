@@ -113,6 +113,20 @@ router.post('/',
     })
 });
 
+// @route    POST api/admin/news/upload-images
+// @desc     Upload news images
+// @access   Private
+router.post('/upload-images', 
+    adminAuthCtrl.tokenVerification,
+    newsCtrl.uploadNewsImages, 
+    (req, res) => {
+    res.status(200);
+    res.send({
+        "message": "News Images Upload Successful",
+        "images": req.images
+    })
+});
+
 // @route    PUT api/admin/news/:newsID
 // @desc     Update a news article
 // @access   Private
@@ -127,6 +141,8 @@ router.put('/:newsID',
         "newsData": req.newsData
     })
 });
+
+
 
 // @route    DELETE api/admin/news/:newsID
 // @desc     Delete a news article

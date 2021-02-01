@@ -214,6 +214,56 @@ const getAllCategoryTree = async (req, res, next) => {
 */
 
 /*News functionality begins here*/
+
+const uploadNewsImages = async (req, res, next) => {
+	let images = [];
+	let imagesUploaded = [];
+	try {
+		if(!is(req, ['multipart'])) return next(new errObj.BadRequestError("The content type must be multipart/form-data"));
+        const busboy = new Busboy({headers: req.headers, highWaterMark: 2 * 1024 * 1024});
+        // busboy.on('field', (fieldname, value) => {
+        //     appendField(req.body, fieldname, value)
+        // });
+        busboy.on('file', (key, file, name, encoding, mimetype) => {
+        	try{
+	            const fileExt = path.extname(name);
+	            const fileNameSplitted = name.split('.');
+	            const filename = fileNameSplitted[fileNameSplitted.length - 2] + '-' + Date.now() + fileExt;
+	            if(fileExt === '.jpeg' || fileExt === '.jpg' ||  fileExt === '.png'){
+	                images.push(filename);
+	                imagesUploaded.push(`/uploads/news/${filename}`);
+	                // filesUploaded.push(`./public/uploads/temp/${filename}`);
+	            	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
+	            }
+	            else {
+	                return next(new errObj.BadRequestError("Invalid file type!!!"));
+	            }
+        	}
+        	catch(err){return next(err)}
+        });
+        busboy.on('finish', async(err) => {
+            if (err) return next(err)
+            const rename = util.promisify(fs.rename);
+			for(image of images){
+				await rename(`./public/uploads/temp/${image}`, `./public/uploads/news/${image}`);
+			}
+            req.images = imagesUploaded;
+            debugger
+            next();
+        });
+        req.pipe(busboy);
+	}
+    catch(err) {
+    	try {
+			await fileDeleter.deleteFiles(filesUploaded);
+		}
+		catch(err){
+			next(err);
+		}
+        next(err)
+    }
+}
+
 const uploadNewsFiles = async (req, res, next) => {
 	let images = [];
     let filesUploaded = [];
@@ -262,6 +312,9 @@ const uploadNewsFiles = async (req, res, next) => {
 const newsValidation = async (req, res, next) => {
 	try {
 		const requiredFields = ['title', 'categoryID', 'publishingAt', 'description'];
+		if(!req.body.images) throw new errObj.BadRequestError("images array field is required");
+		req.images = JSON.parse(req.body.images);
+		if(req.images.length < 1) throw new errObj.BadRequestError("images array field is required and cannot be empty");
 		for(field of requiredFields){
 			if(!req.body[field] || (validationRule.notEmptyValidation(req.body[field]) === false)){
 				throw new errObj.BadRequestError(`${field} field is required and cannot be empty.`);
@@ -278,16 +331,15 @@ const newsValidation = async (req, res, next) => {
 		next();
 	}
 	catch(err) {
-		try {
-			await fileDeleter.deleteFiles(req.filesUploaded);
-		}
-		catch(err){
-			next(err);
-		}
+		// try {
+		// 	await fileDeleter.deleteFiles(req.filesUploaded);
+		// }
+		// catch(err){
+		// 	next(err);
+		// }
 		next(err);
 	}
 }
-
 
 const postNews = async (req, res, next) => {
 	try {
@@ -302,21 +354,21 @@ const postNews = async (req, res, next) => {
 			publishingAt: req.body.publishingAt,
 			createdBy: adminID,
 		})
-		const rename = util.promisify(fs.rename);
-		for(file of req.images){
-			await rename(`./public/uploads/temp/${file}`, `./public/uploads/news/${file}`);
-		}
+		// const rename = util.promisify(fs.rename);
+		// for(file of req.images){
+		// 	await rename(`./public/uploads/temp/${file}`, `./public/uploads/news/${file}`);
+		// }
 		req.newsData = newsData;
 		debugger
 		next();
 	}
     catch(err) {
-    	try {
-			await fileDeleter.deleteFiles(req.filesUploaded);
-		}
-		catch(err){
-			next(err);
-		}
+  //   	try {
+		// 	await fileDeleter.deleteFiles(req.filesUploaded);
+		// }
+		// catch(err){
+		// 	next(err);
+		// }
 		next(err);
     }
 }
@@ -390,7 +442,7 @@ const updateNews = async (req, res, next) => {
 		const news = await News.findOne({_id: newsID});
 		if(!news) return next(new errObj.NotFoundError("News corresponding to the newsID not found"));
 
-		const newsFields = ['title', 'categoryID', 'description'];
+		const newsFields = ['title', 'categoryID'];
 		for(field of newsFields){
 			if(req.body[field]){
 				if(validationRule.notEmptyValidation(req.body[field]) === false){
@@ -399,30 +451,18 @@ const updateNews = async (req, res, next) => {
 				news[field] = req.body[field];
 			}
 		}
+		if(req.body.description){
+			news.description = JSON.parse(req.body.description);
+		}
 		if(req.body.categoryID){
 			if(req.body.categoryID.split('').length != 24) return next(new errObj.BadRequestError("Invalid categoryID"));
 			news.categoryID = req.body.categoryID;
-		}
-		if(req.body.metaTags){
-			const metaTags = JSON.parse(req.body.metaTags);
-			if(metaTags.length < 3) return next(new errObj.BadRequestError("At least 3 tags are required!!!"))
-			news.metaTags = req.body.metaTags;
 		}
 		if(req.body.youtubeLink){
 			news.youtubeLink = req.body.youtubeLink;
 		}
 		if(req.body.publishingAt){
-			if(validationRule.dateValidation(req.body.publishingAt) === false){
-				return next(new errObj.BadRequestError("Invalid publishingAt Date format"));
-			}
 			news.publishingAt = req.body.publishingAt;
-		}
-		if(req.body.imagesToBeDeleted){
-			const imagesToBeDeleted = JSON.parse(req.body.imagesToBeDeleted);
-			for(image of imagesToBeDeleted){
-				await fileDeleter.deleteFile(`./public/uploads/news/${image}`);
-				news.images.pull(image);
-			}
 		}
 		if(req.images.length > 0){
 			const rename = util.promisify(fs.rename);
@@ -481,6 +521,7 @@ const getNewsDetail = async (req, res, next) => {
 		findTreeHierarchyLevel(categoryID);
 		newsData.categoryHierarchy = categoryHierarchy;
 		req.newsData = newsData;
+		console.log(typeof(newsData.createdAt))
 		debugger
 		next();
 	}
@@ -616,4 +657,7 @@ module.exports = {
 	getNewsDetail,
 	getNewsByCategory,
 	getNewsByCategoryForUser,
+
+
+	uploadNewsImages
 }

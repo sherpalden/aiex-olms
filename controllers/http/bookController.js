@@ -166,7 +166,6 @@ const uploadBookFiles = async (req, res, next) => {
         req.pipe(busboy);
 	}
     catch(err) {
-    	console.log(err)
     	try {
 			await fileDeleter.deleteFiles(filesUploaded);
 		}
@@ -404,7 +403,6 @@ const getBooksByCategory = async (req, res, next) => {
         req.nextSkips = nextSkips;
     	req.total = totalBooks;
 		req.books = books;
-		console.log(nextSkips, totalBooks)
 		next();
 	}
 	catch(err){
@@ -428,7 +426,6 @@ const parseFormData = (req, res, next) => {
 				]
 			}
 			const jsonData = JSON.stringify(jsonObj)
-			console.log(JSON.parse(jsonData))
             next();
         });
         req.pipe(busboy);
