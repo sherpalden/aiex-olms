@@ -352,6 +352,7 @@ paths:
                     type: string
                     example: News Images Upload Successful
   
+
   /api/admin/news:
     post:
       tags:
@@ -576,6 +577,33 @@ paths:
                     type: string
                     example: News thumbnail image set Successful
 
+
+  /api/admin/news/search:
+    get:
+      tags:
+        - News APIs - Admin
+      description: Search a news post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: searchKey
+        - in: query
+          name: skips
+        - in: query
+          name: limit
+     
+      responses:
+        200:
+          description: Response on successful Search of news post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: news Post Search Successful
 
 #******
 #******
@@ -957,29 +985,6 @@ paths:
                     example: "Category rename successful"
 
 
-  # /api/admin/book/delete-category/{categoryID}:
-  #   delete:
-  #     tags:
-  #       - Book APIs - Admin
-  #     description: Deletes all the sub categories and book associated with them including the category itself.
-  #     security:
-  #       - bearerAuth: []
-  #     parameters:
-  #       - in: path
-  #         name: categoryID
-  #     responses:
-  #       200:
-  #         description: Response on successful deletion of a category
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               properties:
-  #                 message:
-  #                   type: string
-  #                   example: "Category delete successful"
-
-
   /api/admin/book/all-categories:
     get:
       tags:
@@ -998,8 +1003,6 @@ paths:
                   message:
                     type: string
                     example: "All category list retrieval successful"
-
-
 
 
   /api/admin/book:
@@ -1242,6 +1245,35 @@ paths:
                     type: string
                     example: Books of particular categoryID retrieval successful
 
+
+  /api/admin/book/search:
+    get:
+      tags:
+        - Books APIs - Admin
+      description: Search a book post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: searchKey
+        - in: query
+          name: skips
+        - in: query
+          name: limit
+     
+      responses:
+        200:
+          description: Response on successful Search of book post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: book Post Search Successful
+
+
 #******
 #******
 #******
@@ -1373,7 +1405,261 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "All category list retrieval successful"
+                    example: "All category list retrieval successful"                 
+
+
+  /api/admin/course:
+    post:
+      tags:
+        - Course APIs - Admin
+      description: Create a course post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                thumbnail:
+                  type: string
+                  format: binary
+                files:
+                  type: array
+                  items:
+                     type: string
+                     format: binary
+                title:
+                  type: string
+                  example: Earthquake Resistent Building Design
+                authors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                        example: Palden
+                      lastName:
+                        type: string
+                        example: Sherpa
+                level:
+                  type: string
+                  example: beginner
+                categoryID:
+                  type: string
+                  example: 5454sdfasd54545sdf
+                description:
+                  type: object
+                  example: ck editor object here...
+               
+      responses:
+        200:
+          description: Response on successful creation of course post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: course Post Creation Successful
+
+
+  /api/admin/course/update-details/{courseID}:
+    put:
+      tags:
+        - Course APIs - Admin
+      description: Update a course details
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseID
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Earthquake Resistent Building Design
+                authors:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                        example: Palden
+                      lastName:
+                        type: string
+                        example: Sherpa
+                level:
+                  type: string
+                  example: beginner
+                categoryID:
+                  type: string
+                  example: 5454sdfasd54545sdf
+                description:
+                  type: object
+                  example: ck editor object here...
+      responses:
+        200:
+          description: Response on successful update of course post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: course Post Update Successful
+
+
+  /api/admin/course/update-files/{courseID}:
+    put:
+      tags:
+        - Course APIs - Admin
+      description: Update a course files
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseID
+      requestBody:
+        required: true
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                thumbnail:
+                  type: string
+                  format: binary
+                files:
+                  type: array
+                  items:
+                     type: string
+                     format: binary
+                filesToBeDeleted:
+                  type: array
+                  example: ["file1.pdf", "file2.pdf"]
+                
+      responses:
+        200:
+          description: Response on successful update of course files.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: course files Update Successful
+
+
+  /api/admin/course/{courseID}:
+    get:
+      tags:
+        - Course APIs - Admin
+      description: Get details of a course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseID
+      responses:
+        200:
+          description: Response on successful retrieval of course details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: course details retrieval Successful
+
+    delete:
+      tags:
+        - Course APIs - Admin
+      description: Delete a course post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: courseID
+      responses:
+        200:
+          description: Response on successful deletion of course post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: course Post Delete Successful
+
+
+  /api/admin/course/all-courses/{categoryID}:
+    get:
+      tags:
+        - Course APIs - Admin
+      description: Get all courses of particular category
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryID
+        - in: query
+          name: skips
+        - in: query
+          name: limit
+      responses:
+        200:
+          description: Response on successful retrieval of courses of particular categoryID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: courses of particular categoryID retrieval successful
+
+
+  /api/admin/course/search:
+    get:
+      tags:
+        - Course APIs - Admin
+      description: Search a course post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: searchKey
+        - in: query
+          name: skips
+        - in: query
+          name: limit
+     
+      responses:
+        200:
+          description: Response on successful Search of course post.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: course Post Search Successful
+
 
 #******
 #******

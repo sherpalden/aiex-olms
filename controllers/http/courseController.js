@@ -154,12 +154,12 @@ const uploadCourseFiles = async (req, res, next) => {
             if(fileExt === '.pdf' || fileExt === '.docx'){
             	courseFiles.push(filename);
                 filesUploaded.push(`./public/uploads/temp/${filename}`);
-            	file.pipe(fs.createWriteStream(`./public/uploads/courses/${filename}`));
+            	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
             }
             else if(fileExt === '.jpeg' || fileExt === '.jpg' || fileExt === '.png'){
             	thumbnail = filename;
                 filesUploaded.push(`./public/uploads/temp/${filename}`);
-            	file.pipe(fs.createWriteStream(`./public/uploads/courses/${filename}`));
+            	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
             }
             else {
                 return next(new errObj.BadRequestError("Invalid file type!!!"));
@@ -231,11 +231,11 @@ const postCourse = async (req, res, next) => {
 			level: req.body.level,
 			description: JSON.parse(req.body.description),
 			thumbnail: req.thumbnail,
-			files: req.files,
+			files: req.courseFiles,
 		})
 		const rename = util.promisify(fs.rename);
 		await rename(`./public/uploads/temp/${req.thumbnail}`, `./public/uploads/courses/${req.thumbnail}`);
-		for (file of req.files){
+		for (file of req.courseFiles){
 			await rename(`./public/uploads/temp/${file}`, `./public/uploads/courses/${file}`);
 		}
 		req.courseData = courseData;
@@ -295,7 +295,7 @@ const updateCourseDetails = async (req, res, next) => {
 	}
 }
 
-const updatecourseFiles = async (req, res, next) => {
+const updateCourseFiles = async (req, res, next) => {
 	try{
 		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
 		if(req.params.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
@@ -321,7 +321,7 @@ const updatecourseFiles = async (req, res, next) => {
 	}
 }
 
-const deletecourse = async (req, res, next) => {
+const deleteCourse = async (req, res, next) => {
 	try{
 		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
 		if(req.params.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
@@ -342,7 +342,7 @@ const deletecourse = async (req, res, next) => {
 	}
 }
 
-const getcourseDetails = async (req, res, next) => {
+const getCourseDetails = async (req, res, next) => {
 	try{
 		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
 		if(req.params.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
@@ -363,7 +363,7 @@ const getcourseDetails = async (req, res, next) => {
 			{ $unwind: '$categoryInfo'},
 		])
 		if(courses.length < 1) return next(new errObj.NotFoundError("course not found."))
-		req.course = courses[0]
+		req.courseData = courses[0]
 		next()
 	}
 	catch(err){
@@ -371,7 +371,7 @@ const getcourseDetails = async (req, res, next) => {
 	}
 }
 
-const getcoursesByCategory = async (req, res, next) => {
+const getCoursesByCategory = async (req, res, next) => {
 	try{
 		let skips = 0, limit = 10;
         if(req.query.skips) {skips = parseInt(req.query.skips);}
@@ -414,10 +414,50 @@ const getcoursesByCategory = async (req, res, next) => {
 	}
 }
 
+const searchCourse = async (req, res, next) => {
+	try{
+		let skips = 0, limit = 10;
+        if(req.query.skips) {skips = parseInt(req.query.skips);}
+        if(req.query.limit) {limit = parseInt(req.query.limit);}
+        let nextSkips = skips + limit;
+
+        const searchKey = req.query.searchKey;
+        const results = await Courses.aggregate([
+            { $match: { $text: { $search: searchKey } } },
+            { $sort: { score: { $meta: "textScore" } } },
+            { $skip: skips},
+            { $limit: limit},
+        ])
+
+        if(results.length < limit) {nextSkips = null}
+        req.nextSkips = nextSkips;
+        req.results = results;
+        next()
+	}
+	catch(err){
+		next(err);
+	}
+}
+
+
 module.exports = {
 	addMainCourseCategory,
 	addSubCourseCategory,
 	renameCourseCategory,
 	getAllCourseCategoryTree,
-	getAllCourseCategories
+	getAllCourseCategories,
+
+	uploadCourseFiles,
+	courseValidation,
+	postCourse,
+
+	updateCourseDetails,
+	updateCourseFiles,
+	deleteCourse,
+
+	getCourseDetails,
+	getCoursesByCategory,
+
+
+	searchCourse,
 }

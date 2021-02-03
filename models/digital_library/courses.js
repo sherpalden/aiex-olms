@@ -15,6 +15,7 @@ const CourseSchema = new mongoose.Schema({
 	updatedAt: { type: Date }
 })
 
+CourseSchema.index({title: "text"});
 const Courses = mongoose.model('Course', CourseSchema)
 
 module.exports = Courses

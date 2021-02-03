@@ -40,5 +40,6 @@ const NewsSchema = new mongoose.Schema({
   }
 });
 
+NewsSchema.index({title: "text"});
 const News = mongoose.model('News', NewsSchema );
 module.exports = News;

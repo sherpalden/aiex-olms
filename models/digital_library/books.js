@@ -19,6 +19,7 @@ const BookSchema = new mongoose.Schema({
 	updatedAt: { type: Date }
 })
 
+BookSchema.index({title: "text"});
 const Books = mongoose.model('Book', BookSchema)
 
 module.exports = Books

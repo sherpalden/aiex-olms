@@ -214,7 +214,21 @@ router.get('/all-news/:categoryID',
     })
 });
 
+// @route    GET api/admin/news/search
+// @desc     Search news
+// @access   Private
+router.get('/search',
+    adminAuthCtrl.tokenVerification, 
+    newsCtrl.searchNews,
+    (req, res) => {
+    res.status(200);
+    res.send({
+        "message": "News search Successful",
+        "results": req.results,
+        "nextSkips": req.nextSkips,
 
+    })
+});
 
 
 

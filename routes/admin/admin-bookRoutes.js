@@ -149,13 +149,29 @@ router.get('/all-books/:categoryID',
     })
 });
 
+// @route    GET api/admin/book/search
+// @desc     Search for a book
+// @access   Private
+router.get('/search',
+    adminAuthCtrl.tokenVerification, 
+    bookCtrl.searchBook,
+    (req, res) => {
+    res.status(200);
+    res.send({
+        "message": "Book Search Successful",
+        "results": req.results,
+        "nextSkips": req.nextSkips,
+
+    })
+});
+
 router.post('/form-data',
     bookCtrl.parseFormData,
     (req, res) => {
-        res.status(200)
-        res.send({
-            "message": "Parse Successful"
-        })
+    res.status(200)
+    res.send({
+        "message": "Parse Successful"
     })
+})
 
 module.exports = router

@@ -410,6 +410,30 @@ const getBooksByCategory = async (req, res, next) => {
 	}
 }
 
+const searchBook = async (req, res, next) => {
+	try{
+		let skips = 0, limit = 10;
+        if(req.query.skips) {skips = parseInt(req.query.skips);}
+        if(req.query.limit) {limit = parseInt(req.query.limit);}
+        let nextSkips = skips + limit;
+
+        const searchKey = req.query.searchKey;
+        const results = await Books.aggregate([
+            { $match: { $text: { $search: searchKey } } },
+            { $sort: { score: { $meta: "textScore" } } },
+            { $skip: skips},
+            { $limit: limit},
+        ])
+
+        if(results.length < limit) {nextSkips = null}
+        req.nextSkips = nextSkips;
+        req.results = results;
+        next()
+	}
+	catch(err){
+		next(err);
+	}
+}
 
 const parseFormData = (req, res, next) => {
 	try{
@@ -435,6 +459,8 @@ const parseFormData = (req, res, next) => {
 	}
 }
 
+
+
 module.exports = {
 	addMainBookCategory,
 	addSubBookCategory,
@@ -451,5 +477,6 @@ module.exports = {
 	getBooksByCategory,
 
 
-	parseFormData
+	parseFormData,
+	searchBook
 }

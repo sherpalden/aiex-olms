@@ -21,6 +21,9 @@ router.post('/',
     })
 });
 
+// @route    POST api/admin/dictionary/bulk-upload
+// @desc     Bulk upload dictionary
+// @access   Private
 router.post('/bulk-upload', 
     adminAuthCtrl.tokenVerification,
     dictionaryCtrl.uploadCsvDictionary,
