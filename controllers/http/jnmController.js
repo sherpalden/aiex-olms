@@ -5,13 +5,13 @@ const fs = require('fs')
 const path = require('path')
 const is = require('type-is')
 const util = require('util')
-const appendField = require('append-field')
+var appendField = require('append-field')
 
 //require database models
 const Users = require('../../models/users/users.js')
 const Admins = require('../../models/users/admins.js')
-const Courses = require('../../models/digital_library/courses.js')
-const CourseCategories = require('../../models/digital_library/courseCategories.js')
+const Jnms = require('../../models/digital_library/journalAndMagazines.js')
+const JnmCategories = require('../../models/digital_library/journalMagazineCategories.js')
 
 //require project files
 const errObj = require('../../error/errorHandler.js')
@@ -20,16 +20,16 @@ const fileDeleter = require('../../helpers/http/deleteFiles.js')
 
 
 
-const addMainCourseCategory = async (req, res, next) => {
+const addMainJnmCategory = async (req, res, next) => {
 	try{
 		if(!req.body.categoryName || (validationRule.notEmptyValidation(req.body.categoryName) === false)){
 			return next(new errObj.BadRequestError("categoryName field is required and cannot be empty."));
 		}
-		let rootCategory = await CourseCategories.findOne({parentID: null});
+		let rootCategory = await JnmCategories.findOne({parentID: null});
 		if(!rootCategory){
-			rootCategory = await CourseCategories.create({name: "root", parentID: null});
+			rootCategory = await JnmCategories.create({name: "root", parentID: null});
 		}
-		const category = await CourseCategories.create({
+		const category = await JnmCategories.create({
 			name: req.body.categoryName,
 			parentID: rootCategory._id
 		})
@@ -41,7 +41,7 @@ const addMainCourseCategory = async (req, res, next) => {
 	}
 }
 
-const addSubCourseCategory = async (req, res, next) => {
+const addSubJnmCategory = async (req, res, next) => {
 	try{
 		if(!req.body.categoryName || (validationRule.notEmptyValidation(req.body.categoryName) === false)){
 			return next(new errObj.BadRequestError("categoryName field is required and cannot be empty."));
@@ -51,10 +51,10 @@ const addSubCourseCategory = async (req, res, next) => {
 		}
 		if(req.body.parentID.split('').length != 24) return next(new errObj.BadRequestError("Invalid parentID"));
 
-		const category = await CourseCategories.findOne({_id: req.body.parentID});
+		const category = await JnmCategories.findOne({_id: req.body.parentID});
 		if(!category) return next(new errObj.NotFoundError("Category corresponding to parentID not found"));
 
-		const newCategory = await CourseCategories.create({
+		const newCategory = await JnmCategories.create({
 			name: req.body.categoryName,
 			parentID: req.body.parentID
 		})
@@ -66,7 +66,7 @@ const addSubCourseCategory = async (req, res, next) => {
 	}
 }
 
-const renameCourseCategory = async (req, res, next) => {
+const renameJnmCategory = async (req, res, next) => {
 	try{
 		if(!req.body.newName || (validationRule.notEmptyValidation(req.body.newName) === false)){
 			return next(new errObj.BadRequestError("newName field is required and cannot be empty."));
@@ -76,7 +76,7 @@ const renameCourseCategory = async (req, res, next) => {
 		}
 		if(req.body.categoryID.split('').length != 24) return next(new errObj.BadRequestError("Invalid categoryID"));
 
-		const category = await CourseCategories.findOne({_id: req.body.categoryID});
+		const category = await JnmCategories.findOne({_id: req.body.categoryID});
 		if(!category) return next(new errObj.NotFoundError("Category corresponding to categoryID not found"));
 
 		category.name = req.body.newName;
@@ -89,9 +89,9 @@ const renameCourseCategory = async (req, res, next) => {
 	}
 }
 
-const getAllCourseCategoryTree = async (req, res, next) => {
+const getAllJnmCategory = async (req, res, next) => {
 	try{
-		const categories = await CourseCategories.find({});
+		const categories = await JnmCategories.find({});
 		let data = categories.map(el => {
 			let parentID;
 			if(el.parentID != null) {parentID = el.parentID.toString();}
@@ -125,22 +125,12 @@ const getAllCourseCategoryTree = async (req, res, next) => {
 	}
 }
 
-const getAllCourseCategories = async (req, res, next) => {
-	try{
-		const categories = await CourseCategories.find({});
-		req.categories = categories;
-		debugger
-		next();
-	}
-	catch(err){
-		next(err);
-	}
-}
 
-const uploadCourseFiles = async (req, res, next) => {
+
+const uploadJnmFiles = async (req, res, next) => {
     let filesUploaded = [];
     let thumbnail;
-    let courseFiles = [];
+    let jnmFiles = [];
 	try {
 		if(!is(req, ['multipart'])) return next(new errObj.BadRequestError("The content type must be multipart/form-data"));
         const busboy = new Busboy({headers: req.headers, highWaterMark: 2 * 1024 * 1024});
@@ -152,7 +142,7 @@ const uploadCourseFiles = async (req, res, next) => {
             const fileNameSplitted = name.split('.');
             const filename = fileNameSplitted[fileNameSplitted.length - 2] + '-' + Date.now() + fileExt;
             if(fileExt === '.pdf' || fileExt === '.docx'){
-            	courseFiles.push(filename);
+            	jnmFiles.push(filename);
                 filesUploaded.push(`./public/uploads/temp/${filename}`);
             	file.pipe(fs.createWriteStream(`./public/uploads/temp/${filename}`));
             }
@@ -169,7 +159,7 @@ const uploadCourseFiles = async (req, res, next) => {
             if (err) return next(err)
             if(thumbnail) {req.thumbnail = thumbnail};
             req.filesUploaded = filesUploaded;
-            req.courseFiles = courseFiles;
+            req.jnmFiles = jnmFiles;
             debugger
             next();
         });
@@ -187,10 +177,10 @@ const uploadCourseFiles = async (req, res, next) => {
     }
 }
 
-const courseValidation = async (req, res, next) => {
+const jnmValidation = async (req, res, next) => {
 	try {
-		const requiredFields = ['title', 'description', 'categoryID', 'level'];
-		if(!(req.thumbnail)) throw new errObj.BadRequestError("course thumbnail image is required");
+		const requiredFields = ['title', 'category', 'abstract', 'categoryID', 'publisher', 'edition', 'publicationDate', 'noOfPages', 'doi'];
+		if(!(req.thumbnail)) throw new errObj.BadRequestError("thumbnail image is required");
 		for(field of requiredFields){
 			if(!req.body[field] || (validationRule.notEmptyValidation(req.body[field]) === false)){
 				throw new errObj.BadRequestError(`${field} field is required and cannot be empty.`);
@@ -222,23 +212,30 @@ const courseValidation = async (req, res, next) => {
 	}
 }
 
-const postCourse = async (req, res, next) => {
+const postJnm = async (req, res, next) => {
 	try {
-		const courseData = await Courses.create({ 
+		const jnmData = await Jnms.create({ 
 			title: req.body.title,
+			category: req.body.category,
 			authors: JSON.parse(req.body.authors),
 			categoryID: req.body.categoryID,
-			level: req.body.level,
-			description: JSON.parse(req.body.description),
+			noOfPages: parseInt(req.body.noOfPages),
+			publisher: req.body.publisher,
+			abstract: req.body.abstract,
+			edition: req.body.edition,
+			publicationDate: req.body.publicationDate,
+			keywords: JSON.parse(req.body.keywords) || null,
+			youtubeLinks: JSON.parse(req.body.youtubeLinks) || null,
+			doi: req.body.doi,
 			thumbnail: req.thumbnail,
-			files: req.courseFiles,
+			files: req.jnmFiles,
 		})
 		const rename = util.promisify(fs.rename);
-		await rename(`./public/uploads/temp/${req.thumbnail}`, `./public/uploads/courses/${req.thumbnail}`);
-		for (file of req.courseFiles){
-			await rename(`./public/uploads/temp/${file}`, `./public/uploads/courses/${file}`);
+		await rename(`./public/uploads/temp/${req.thumbnail}`, `./public/uploads/jnms/${req.thumbnail}`);
+		for(file of jnmFiles){
+			await rename(`./public/uploads/temp/${file}`, `./public/uploads/jnms/${file}`);
 		}
-		req.courseData = courseData;
+		req.jnmData = jnmData;
 		debugger
 		next();
 	}
@@ -253,25 +250,26 @@ const postCourse = async (req, res, next) => {
     }
 }
 
-const updateCourseDetails = async (req, res, next) => {
+const updateJnmDetails = async (req, res, next) => {
 	try{
-		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
-		if(req.body.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
-		const courseID = mongoose.Types.ObjectId(req.params.courseID)
-		const course = await Courses.findOne({_id: courseID})
-		if(!course) return next(new errObj.NotFoundError("course not found."))
+		if(!req.params.jnmID) return next(new errObj.BadRequestError("jnmID is required as url parameter"))
+		if(req.body.jnmID.split('').length != 24) return next(new errObj.BadRequestError("Invalid jnmID"))
+		const jnmID = mongoose.Types.ObjectId(req.params.jnmID)
+		const jnm = await Jnms.findOne({_id: jnmID})
+		if(!jnm) return next(new errObj.NotFoundError("jnm not found."))
 
-		const courseFields = ['title', 'categoryID', 'level']
-		for(field of courseFields){
+		const jnmFields = ['title', 'category', 'abstract', 'categoryID', 'publisher', 'edition', 'publicationDate', 'noOfPages', 'doi'];
+		for(field of jnmFields){
 			if(req.body[field]){
 				if(validationRule.notEmptyValidation(req.body[field]) === false){
 					return next(new errObj.BadRequestError(`${field} field cannot be empty.`))
 				}
-				course[field] = req.body[field]
+				jnm[field] = req.body[field]
 			}
 		}
 		if(req.body.categoryID){
 			if(req.body.categoryID.split('').length != 24) return next(new errObj.BadRequestError("Invalid categoryID"));
+			jnm.categoryID = req.body.categoryID
 		}
 		if(req.body.authors){
 			for(author of authors){
@@ -282,12 +280,11 @@ const updateCourseDetails = async (req, res, next) => {
 					return next(new errObj.BadRequestError("firstName and lastName field is required and cannot be empty"))
 				}
 			}
-			course.authors = JSON.parse(req.body.authors)
+			jnm.authors = JSON.parse(req.body.authors)
 		}
-		if(req.body.description){
-			course.description = JSON.parse(req.body.description);
-		}
-		await course.save();
+		if(req.body.keywords) {jnm.keywords = JSON.parse(req.body.keywords)};
+		if(req.body.youtubeLinks) {jnm.youtubeLinks = JSON.parse(req.body.youtubeLinks)};
+		await jnm.save();
 		next();
 	}
 	catch(err){
@@ -295,37 +292,37 @@ const updateCourseDetails = async (req, res, next) => {
 	}
 }
 
-const updateCourseFiles = async (req, res, next) => {
+const updateJnmFiles = async (req, res, next) => {
 	try{
-		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
-		if(req.params.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
-		const courseID = mongoose.Types.ObjectId(req.params.courseID)
-		const course = await Courses.findOne({_id: courseID})
-		if(!course) return next(new errObj.NotFoundError("course not found."))
+		if(!req.params.jnmID) return next(new errObj.BadRequestError("jnmID is required as url parameter"))
+		if(req.params.jnmID.split('').length != 24) return next(new errObj.BadRequestError("Invalid jnmID"))
+		const jnmID = mongoose.Types.ObjectId(req.params.jnmID)
+		const jnm = await Jnms.findOne({_id: jnmID})
+		if(!jnm) return next(new errObj.NotFoundError("jnm not found."))
 
 		let filesToBeDeleted = [];
 		if(req.filesToBeDeleted){
 			for(file of filesToBeDeleted){
-				if(course.files.includes(file)){
-					filesToBeDeleted.push(`./public/uploads/courses/${file}`);
-					course.files.splice(course.files.indexOf(file), 1);
+				if(jnm.files.includes(file)){
+					filesToBeDeleted.push(`./public/uploads/jnms/${file}`);
+					jnm.files.splice(jnm.files.indexOf(file), 1);
 				}
 			}
 		}
 		const rename = util.promisify(fs.rename);
 		if(req.thumbnail){
-			await rename(`./public/uploads/temp/${req.thumbnail}`, `./public/uploads/courses/${req.thumbnail}`);
-			if(course.thumbnail) { filesToBeDeleted.push(`./public/uploads/courses/${course.thumbnail}`) }
-			course.thumbnail = req.thumbnail
+			await rename(`./public/uploads/temp/${req.thumbnail}`, `./public/uploads/jnms/${req.thumbnail}`);
+			if(jnm.thumbnail) { filesToBeDeleted.push(`./public/uploads/jnms/${jnm.thumbnail}`) }
+			jnm.thumbnail = req.thumbnail
 		}
-		if(req.courseFiles){
-			for(file of courseFiles){
-				await rename(`./public/uploads/temp/${file}`, `./public/uploads/courses/${file}`);
-				course.files.push(file);
+		if(req.jnmFiles){
+			for(file of jnmFiles){
+				await rename(`./public/uploads/temp/${file}`, `./public/uploads/jnms/${file}`);
+				jnm.files.push(file);
 			}
 		}
 		await fileDeleter.deleteFiles(filesToBeDeleted);
-		await course.save()
+		await jnm.save()
 		next()
 	}
 	catch(err){
@@ -333,20 +330,20 @@ const updateCourseFiles = async (req, res, next) => {
 	}
 }
 
-const deleteCourse = async (req, res, next) => {
+const deleteJnm = async (req, res, next) => {
 	try{
-		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
-		if(req.params.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
-		const courseID = mongoose.Types.ObjectId(req.params.courseID)
-		const course = await Courses.findOne({_id: courseID})
-		if(!course) return next(new errObj.NotFoundError("course not found."))
+		if(!req.params.jnmID) return next(new errObj.BadRequestError("jnmID is required as url parameter"))
+		if(req.params.jnmID.split('').length != 24) return next(new errObj.BadRequestError("Invalid jnmID"))
+		const jnmID = mongoose.Types.ObjectId(req.params.jnmID)
+		const jnm = await Jnms.findOne({_id: jnmID})
+		if(!jnm) return next(new errObj.NotFoundError("jnm not found."))
 		let filesToBeDeleted = []
-		if(course.thumbnail) { filesToBeDeleted.push(`./public/uploads/courses/${course.thumbnail}`) }
-		for (file of course.files){
-			filesToBeDeleted.push(`./public/uploads/courses/${file}`)
+		if(jnm.thumbnail) { filesToBeDeleted.push(`./public/uploads/jnms/${jnm.thumbnail}`) }
+		for(file of jnm.files){
+			filesToBeDeleted.push(`./public/uploads/jnms/${file}`)
 		}
 		await fileDeleter.deleteFiles(filesToBeDeleted)
-		await Courses.deleteOne({_id: courseID})
+		await Jnms.deleteOne({_id: jnmID})
 		next()
 	}
 	catch(err){
@@ -354,16 +351,16 @@ const deleteCourse = async (req, res, next) => {
 	}
 }
 
-const getCourseDetails = async (req, res, next) => {
+const getJnmDetails = async (req, res, next) => {
 	try{
-		if(!req.params.courseID) return next(new errObj.BadRequestError("courseID is required as url parameter"))
-		if(req.params.courseID.split('').length != 24) return next(new errObj.BadRequestError("Invalid courseID"))
-		const courseID = mongoose.Types.ObjectId(req.params.courseID)
-		const courses = await Courses.aggregate([
-			{ $match: {_id: courseID}},
+		if(!req.params.jnmID) return next(new errObj.BadRequestError("jnmID is required as url parameter"))
+		if(req.params.jnmID.split('').length != 24) return next(new errObj.BadRequestError("Invalid jnmID"))
+		const jnmID = mongoose.Types.ObjectId(req.params.jnmID)
+		const jnms = await Jnms.aggregate([
+			{ $match: {_id: jnmID}},
 			{ $lookup: 
 				{ 
-					from: 'course_categories', 
+					from: 'journal_magazine_categories', 
 					let: { category_id: "$categoryID" },
 					pipeline: [
 						{ $match: { $expr: { $eq: ["$_id", "$$category_id"] } } },
@@ -374,8 +371,8 @@ const getCourseDetails = async (req, res, next) => {
 			},
 			{ $unwind: '$categoryInfo'},
 		])
-		if(courses.length < 1) return next(new errObj.NotFoundError("course not found."))
-		req.courseData = courses[0]
+		if(jnms.length < 1) return next(new errObj.NotFoundError("Jnm not found."))
+		req.jnm = jnms[0]
 		next()
 	}
 	catch(err){
@@ -383,7 +380,7 @@ const getCourseDetails = async (req, res, next) => {
 	}
 }
 
-const getCoursesByCategory = async (req, res, next) => {
+const getJnmsByCategory = async (req, res, next) => {
 	try{
 		let skips = 0, limit = 10;
         if(req.query.skips) {skips = parseInt(req.query.skips);}
@@ -394,13 +391,13 @@ const getCoursesByCategory = async (req, res, next) => {
 		if(req.params.categoryID.split('').length != 24) return next(new errObj.BadRequestError("Invalid categoryID"))
 		const categoryID = mongoose.Types.ObjectId(req.params.categoryID)
 
-		const courses = await Courses.aggregate([
+		const jnms = await Jnms.aggregate([
 			{ $match: {categoryID: categoryID}},
 			{ $skip: skips},
 			{ $limit: limit},
 			{ $lookup: 
 				{ 
-					from: 'course_categories', 
+					from: 'journal_magazine_categories', 
 					let: { category_id: "$categoryID" },
 					pipeline: [
 						{ $match: { $expr: { $eq: ["$_id", "$$category_id"] } } },
@@ -412,13 +409,13 @@ const getCoursesByCategory = async (req, res, next) => {
 			{ $unwind: '$categoryInfo'},
 		])
 
-		// if(courses.length < 1) return next(new errObj.NotFoundError("course not found."))
+		// if(jnms.length < 1) return next(new errObj.NotFoundError("Book not found."))
 
-		const totalcourses = await Courses.countDocuments({categoryID: categoryID})
-		if(totalcourses < nextSkips) {nextSkips = null}
+		const totalJnms = await Books.countDocuments({categoryID: categoryID})
+		if(totalBooks < nextSkips) {nextSkips = null}
         req.nextSkips = nextSkips;
-    	req.total = totalcourses;
-		req.courses = courses;
+    	req.total = totalJnms;
+		req.jnms = jnms;
 		next();
 	}
 	catch(err){
@@ -426,7 +423,7 @@ const getCoursesByCategory = async (req, res, next) => {
 	}
 }
 
-const searchCourse = async (req, res, next) => {
+const searchJnm = async (req, res, next) => {
 	try{
 		let skips = 0, limit = 10;
         if(req.query.skips) {skips = parseInt(req.query.skips);}
@@ -434,7 +431,7 @@ const searchCourse = async (req, res, next) => {
         let nextSkips = skips + limit;
 
         const searchKey = req.query.searchKey;
-        const results = await Courses.aggregate([
+        const results = await Jnms.aggregate([
             { $match: { $text: { $search: searchKey } } },
             { $sort: { score: { $meta: "textScore" } } },
             { $skip: skips},
@@ -453,23 +450,20 @@ const searchCourse = async (req, res, next) => {
 
 
 module.exports = {
-	addMainCourseCategory,
-	addSubCourseCategory,
-	renameCourseCategory,
-	getAllCourseCategoryTree,
-	getAllCourseCategories,
+	addMainJnmCategory,
+	addSubJnmCategory,
+	renameJnmCategory,
+	getAllJnmCategory,
 
-	uploadCourseFiles,
-	courseValidation,
-	postCourse,
-
-	updateCourseDetails,
-	updateCourseFiles,
-	deleteCourse,
-
-	getCourseDetails,
-	getCoursesByCategory,
+	uploadJnmFiles,
+	jnmValidation,
+	postJnm,
+	updateJnmDetails,
+	updateJnmFiles,
+	deleteJnm,
+	getJnmDetails,
+	getJnmsByCategory,
 
 
-	searchCourse,
+	searchJnm
 }

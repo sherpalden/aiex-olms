@@ -40,6 +40,9 @@ app.use('/api/user/book', userBookRoutes);
 const userCourseRoutes = require('./routes/users/user-courseRoutes.js');
 app.use('/api/user/course', userCourseRoutes);
 
+const userJnmRoutes = require('./routes/users/user-jnmRoutes.js');
+app.use('/api/user/jnm', userJnmRoutes);
+
 //adminRoutes
 const adminRoutes = require('./routes/admin/adminRoutes.js');
 app.use('/api/admin', adminRoutes);
@@ -55,6 +58,9 @@ app.use('/api/admin/book', adminBookRoutes);
 
 const adminCourseRoutes = require('./routes/admin/admin-courseRoutes.js');
 app.use('/api/admin/course', adminCourseRoutes);
+
+const adminJnmRoutes = require('./routes/admin/admin-jnmRoutes.js');
+app.use('/api/admin/jnm', adminJnmRoutes);
 
 
 
