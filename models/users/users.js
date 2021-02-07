@@ -10,16 +10,29 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  fullName: {
+    type: String,
+    required: true
+  },
   email: {
   	type: String,
   	required: true,
     unique: true,
   },
-  password: {
-  	type: String,
+  profilePic: {
+    type: String,
   },
-  isVerified: {
-    type: Boolean, default: false
+  gender: {
+    type: String,
+  },
+  socialLinks: {
+    facebook: {type: String},
+    instagram: {type: String},
+    twitter: {type: String},
+    linkedin: {type: String},
+  },
+  about: {
+    type: String
   }
 });
 

@@ -104,7 +104,6 @@ router.put('/reset-password',
     })
 });
 
-
 // @route    GET api/admin/profile
 // @desc     Retrieve the admin profile
 // @access   Private
